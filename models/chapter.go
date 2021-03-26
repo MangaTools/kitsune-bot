@@ -2,7 +2,6 @@ package models
 
 import (
 	"fmt"
-	"github.com/bwmarrin/discordgo"
 )
 
 type ChapterStatus int
@@ -43,20 +42,13 @@ func GetAllChapterStatusesString() string {
 }
 
 type Chapter struct {
-	Id              int               `json:"id"`
-	MangaName       string            `json:"manga_name"`
-	Number          int               `json:"number"`
-	Pages           int               `json:"pages"`
-	PartsCleanOwner []PagesOwner      `json:"parts_clean_owner"`
-	PartsTyperOwner []PagesOwner      `json:"parts_typer_owner"`
-	Translator      []PagesOwner      `json:"translator"`
-	Editor          []PagesOwner      `json:"editor"`
-	Message         discordgo.Message `json:"message"`
-	Status          ChapterStatus     `json:"status"`
-}
-
-type PagesOwner struct {
-	StartPage int
-	EndPage   int
-	UserId    string
+	Id         int           `json:"id" db:"id"`
+	MangaId    int           `json:"manga_id" db:"manga_id"`
+	Number     float32       `json:"number" db:"number"`
+	Pages      int           `json:"pages" db:"pages"`
+	CleanOwner []Owner       `json:"clean_owner" db:"-"`
+	TyperOwner []Owner       `json:"typer_owner" db:"-"`
+	Translator []Owner       `json:"translator" db:"-"`
+	Editor     []Owner       `json:"editor" db:"-"`
+	Status     ChapterStatus `json:"status" db:"status"`
 }
