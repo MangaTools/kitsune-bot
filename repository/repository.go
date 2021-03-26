@@ -6,10 +6,11 @@ import (
 )
 
 type MangaRepository interface {
-	GetManga(id int) (models.Manga, error)
-	DeleteManga(id int) (bool, error)
-	AddManga(manga models.Manga) (int, error)
-	GetMangas() ([]models.Manga, error)
+	CreateManga(name string, status models.MangaStatus) (int, error)
+	DeleteManga(id int) error
+	HasManga(id int) bool
+	GetManga(id int) (*models.Manga, error)
+	GetMangas(max int, page int) ([]*models.Manga, error)
 }
 
 type Repository struct {

@@ -17,7 +17,8 @@ func NewHandler(services *service.Service) *Handler {
 }
 
 func (h *Handler) InitRouts(session *discordgo.Session) {
-	r := router.NewRouter(session, os.Getenv("prefix"))
+	prefix := os.Getenv("prefix")
+	r := router.NewRouter(session, prefix)
 
 	commands := []router.OnMessageCommand{
 		{
@@ -46,6 +47,24 @@ func (h *Handler) InitRouts(session *discordgo.Session) {
 				HelpText:    "манга статусы - позволяет увидеть все доступные для манги статусы",
 			},
 			Handler: h.GetMangaStatuses,
+		},
+		{
+			BaseCommand: router.BaseCommand{
+				Name:        "манга лист",
+				Description: "позволяет увидеть несколько манг",
+				GroupName:   "Манга",
+				HelpText:    "манга лист <страница(опционально, по умолчанию 1)> - позволяет увидеть до 10 манг на странице",
+			},
+			Handler: h.ListManga,
+		},
+		{
+			BaseCommand: router.BaseCommand{
+				Name:        "манга показать",
+				Description: "позволяет увидеть конкретную мангу",
+				GroupName:   "Манга",
+				HelpText:    "манга показать <ID> - позволяет увидеть конкретную мангу",
+			},
+			Handler: h.ShowManga,
 		},
 	}
 

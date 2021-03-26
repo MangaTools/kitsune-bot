@@ -1,6 +1,10 @@
 package models
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/bwmarrin/discordgo"
+	"strconv"
+)
 
 type MangaStatus int
 
@@ -24,7 +28,7 @@ func IsValidMangaStatus(id MangaStatus) bool {
 
 func GetMangaStatusString(id MangaStatus) string {
 	if val, ok := mangaStatusToString[id]; ok {
-		return fmt.Sprintf("%d - %s", int(id), val)
+		return val
 	}
 	return "Такого статуса нет"
 }
@@ -42,6 +46,23 @@ type Manga struct {
 	Name     string      `json:"name" db:"name"`
 	Chapters []*Chapter  `json:"chapters" db:"-"`
 	Status   MangaStatus `json:"status" db:"status"`
+}
+
+func (m *Manga) ShowString() *discordgo.MessageEmbed {
+	embed := &discordgo.MessageEmbed{
+		Type:        discordgo.EmbedTypeRich,
+		Title:       m.Name,
+		Description: fmt.Sprintf("Статус: %s", GetMangaStatusString(m.Status)),
+		Color:       0,
+		Fields: []*discordgo.MessageEmbedField{
+			{
+				Name:   "ID",
+				Value:  strconv.Itoa(m.Id),
+				Inline: false,
+			},
+		},
+	}
+	return embed
 }
 
 func NewManga(id int, name string) *Manga {

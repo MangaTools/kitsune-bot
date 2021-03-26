@@ -47,10 +47,10 @@ func main() {
 
 	bot := kitsune_bot.NewBot(handlers, token)
 	err = bot.Start()
+	defer bot.Stop()
 	if err != nil {
 		logrus.Fatal(err)
 	}
-	defer bot.Stop()
 
 	stop := make(chan os.Signal)
 	signal.Notify(stop, os.Interrupt)
