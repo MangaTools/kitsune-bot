@@ -38,10 +38,10 @@ func GetAllMangaStatusesString() string {
 }
 
 type Manga struct {
-	Id       int         `json:"id"`
-	Name     string      `json:"name"`
-	Chapters []*Chapter  `json:"chapters"`
-	Status   MangaStatus `json:"status"`
+	Id       int         `json:"id" db:"id"`
+	Name     string      `json:"name" db:"name"`
+	Chapters []*Chapter  `json:"chapters" db:"-"`
+	Status   MangaStatus `json:"status" db:"status"`
 }
 
 func NewManga(id int, name string) *Manga {
