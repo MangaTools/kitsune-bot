@@ -78,8 +78,8 @@ func (r *Router) handleMessage(session *discordgo.Session, create *discordgo.Mes
 
 // built-in function to print help string in chat
 func (r *Router) helpFunction(session *discordgo.Session, create *discordgo.MessageCreate, c *RouterContext) {
-	if len(c.Args) > 0 {
-		lowered := strings.ToLower(c.Args[0])
+	if len(c.StartText) > 0 {
+		lowered := strings.ToLower(c.StartText)
 		for name, c := range r.routs {
 			if strings.HasPrefix(lowered, name) {
 				_, err := session.ChannelMessageSend(create.ChannelID, c.HelpText)

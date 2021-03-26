@@ -8,10 +8,12 @@ import (
 var r = regexp.MustCompile(`(".+")|(\S+)`)
 
 type RouterContext struct {
-	Args []string
+	Args      []string
+	StartText string
 }
 
 func NewRouterContext(input string) *RouterContext {
+	trimmedSpaces := strings.TrimSpace(input)
 	result := r.FindAllString(input, -1)
 	for i, val := range result {
 		if strings.HasPrefix(val, "\"") {
@@ -19,6 +21,7 @@ func NewRouterContext(input string) *RouterContext {
 		}
 	}
 	return &RouterContext{
-		Args: result,
+		Args:      result,
+		StartText: trimmedSpaces,
 	}
 }
