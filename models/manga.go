@@ -1,4 +1,4 @@
-package group
+package models
 
 import "fmt"
 
@@ -38,12 +38,12 @@ func GetAllMangaStatusesString() string {
 }
 
 type Manga struct {
-	Id       int
-	Name     string
-	chapters []Manga
-	Status   MangaStatus
+	Id       int         `json:"id"`
+	Name     string      `json:"name"`
+	Chapters []*Chapter  `json:"chapters"`
+	Status   MangaStatus `json:"status"`
 }
 
 func NewManga(id int, name string) *Manga {
-	return &Manga{Name: name, Id: id, Status: TranslatingManga}
+	return &Manga{Name: name, Id: id, Status: TranslatingManga, Chapters: make([]*Chapter, 0)}
 }

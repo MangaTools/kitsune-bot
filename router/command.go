@@ -23,4 +23,4 @@ func NewOnMessageCommand(Name string, Description string, GroupName string, Help
 		Handler: handler}
 }
 
-type OnMessageCreate func(*discordgo.Session, *discordgo.MessageCreate, string)
+type OnMessageCreate func(*discordgo.Session, *discordgo.MessageCreate, *RouterContext)

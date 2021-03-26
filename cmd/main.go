@@ -1,9 +1,10 @@
 package main
 
 import (
-	"github.com/ShaDream/kitsune-bot/group"
-	"github.com/ShaDream/kitsune-bot/router"
-	"github.com/bwmarrin/discordgo"
+	kitsune_bot "github.com/ShaDream/kitsune-bot"
+	"github.com/ShaDream/kitsune-bot/controller"
+	"github.com/ShaDream/kitsune-bot/repository"
+	"github.com/ShaDream/kitsune-bot/service"
 	"github.com/joho/godotenv"
 	"github.com/sirupsen/logrus"
 	"os"
@@ -23,28 +24,36 @@ func init() {
 }
 
 func main() {
-	s, err := discordgo.New("Bot " + token)
+	err := godotenv.Load()
 	if err != nil {
-		logrus.Fatal("error creating Discord session,", err)
+		logrus.Fatalf("error occured while reading env file %s", err.Error())
 	}
 
-	r := router.NewRouter(s, "!")
-	chapterWorker := group.NewChapterWorker()
-	chapterWorker.RegisterCommands(r)
-
-	r.Start()
-
-	// In this example, we only care about receiving message events.
-	s.Identify.Intents = discordgo.IntentsGuildMessages
-
-	err = s.Open()
+	db, err := repository.NewPostgresDB(repository.Config{
+		Host:     os.Getenv("db_host"),
+		Port:     os.Getenv("db_port"),
+		Username: os.Getenv("db_user"),
+		Password: os.Getenv("db_pass"),
+		DBName:   os.Getenv("db_name"),
+		SSLMode:  "disable",
+	})
 	if err != nil {
-		logrus.Fatal("can't open connection,", err)
+		logrus.Fatalf("error occured while connecting to db %s", err.Error())
 	}
-	defer s.Close()
+
+	repos := repository.NewRepository(db)
+	services := service.NewService(repos)
+	handlers := controller.NewHandler(services)
+
+	bot := kitsune_bot.NewBot(handlers, token)
+	err = bot.Start()
+	if err != nil {
+		logrus.Fatal(err)
+	}
+	defer bot.Stop()
 
 	stop := make(chan os.Signal)
 	signal.Notify(stop, os.Interrupt)
 	<-stop
-	logrus.Println("Gracefully shutdowning")
+	logrus.Println("Gracefully shutdowning...")
 }

@@ -1,4 +1,4 @@
-package group
+package models
 
 import (
 	"fmt"
@@ -43,15 +43,20 @@ func GetAllChapterStatusesString() string {
 }
 
 type Chapter struct {
-	Id              int
-	MangaName       string
-	Number          int
-	Pages           int
-	Parts           int
-	PartsCleanOwner []discordgo.User
-	PartsTyperOwner []discordgo.User
-	Translator      []discordgo.User
-	Editor          []discordgo.User
-	Message         discordgo.Message
-	Status          ChapterStatus
+	Id              int               `json:"id"`
+	MangaName       string            `json:"manga_name"`
+	Number          int               `json:"number"`
+	Pages           int               `json:"pages"`
+	PartsCleanOwner []PagesOwner      `json:"parts_clean_owner"`
+	PartsTyperOwner []PagesOwner      `json:"parts_typer_owner"`
+	Translator      []PagesOwner      `json:"translator"`
+	Editor          []PagesOwner      `json:"editor"`
+	Message         discordgo.Message `json:"message"`
+	Status          ChapterStatus     `json:"status"`
+}
+
+type PagesOwner struct {
+	StartPage int
+	EndPage   int
+	UserId    string
 }

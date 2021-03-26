@@ -47,38 +47,7 @@ func (r *Router) setHelpCommand() {
 			HelpText:    fmt.Sprintf("Зачем тебе это? Просто вызови %sпомощь.", r.Prefix),
 			GroupName:   "",
 		},
-		Handler: func(session *discordgo.Session, create *discordgo.MessageCreate, arg string) {
-			arg = strings.TrimSpace(arg)
-
-			if len(arg) > 0 {
-				lowered := strings.ToLower(arg)
-				for name, c := range r.routs {
-					if strings.HasPrefix(lowered, name) {
-						_, err := session.ChannelMessageSend(create.ChannelID, c.HelpText)
-						if err != nil {
-							logrus.Error(err)
-						}
-						return
-					}
-				}
-			}
-
-			text := ""
-			for groupName, g := range r.groups {
-				if groupName != "" {
-					text += fmt.Sprintf("%s:\n", groupName)
-				}
-				for _, c := range g {
-					text += fmt.Sprintf("%s%s - %s\n", r.Prefix, c.Name, c.Description)
-				}
-				text += "\n"
-			}
-
-			_, err := session.ChannelMessageSend(create.ChannelID, text)
-			if err != nil {
-				logrus.Error(err)
-			}
-		},
+		Handler: r.helpFunction,
 	}
 	r.RegisterOnMessageCommand(command)
 }
@@ -87,22 +56,54 @@ func (r *Router) handleMessage(session *discordgo.Session, create *discordgo.Mes
 	if create.Author.ID == session.State.User.ID {
 		return
 	}
-	logrus.WithFields(logrus.Fields{
-		"Username": create.Author.Username,
-		"Id":       create.Author.ID,
-		"Roles":    create.Member.Roles,
-	}).Info("message sent")
+
+	// Find prefix and delete
 	text := create.Content
 	if !strings.HasPrefix(text, r.Prefix) {
 		return
 	}
 	text = strings.TrimLeft(text, r.Prefix)
 	lowerText := strings.ToLower(text)
+
+	// Try find command and execute it
 	for name, command := range r.routs {
 		if strings.HasPrefix(lowerText, name) {
+			// remove command text from text content to parse the rest of the line
 			text = strings.TrimSpace(text[len(name):])
-			command.Handler(session, create, text)
+			command.Handler(session, create, NewRouterContext(text))
 			return
 		}
+	}
+}
+
+// built-in function to print help string in chat
+func (r *Router) helpFunction(session *discordgo.Session, create *discordgo.MessageCreate, c *RouterContext) {
+	if len(c.Args) > 0 {
+		lowered := strings.ToLower(c.Args[0])
+		for name, c := range r.routs {
+			if strings.HasPrefix(lowered, name) {
+				_, err := session.ChannelMessageSend(create.ChannelID, c.HelpText)
+				if err != nil {
+					logrus.Error(err)
+				}
+				return
+			}
+		}
+	}
+
+	text := ""
+	for groupName, g := range r.groups {
+		if groupName != "" {
+			text += fmt.Sprintf("%s:\n", groupName)
+		}
+		for _, c := range g {
+			text += fmt.Sprintf("%s%s - %s\n", r.Prefix, c.Name, c.Description)
+		}
+		text += "\n"
+	}
+
+	_, err := session.ChannelMessageSend(create.ChannelID, text)
+	if err != nil {
+		logrus.Error(err)
 	}
 }
