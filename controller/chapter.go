@@ -39,12 +39,7 @@ type createChapterArgs struct {
 
 func (h *Handler) CreateChapter(session *discordgo.Session, create *discordgo.MessageCreate, c *router.RouterContext) {
 	args := new(createChapterArgs)
-	err := CreateFromStringArgs(c.Args, args)
-	if err != nil {
-		session.ChannelMessageSend(create.ChannelID, err.Error())
-		return
-	}
-	err = Validator.Struct(args)
+	err := FillAndValidateStruct(args, c.Args)
 	if err != nil {
 		session.ChannelMessageSend(create.ChannelID, err.Error())
 		return
