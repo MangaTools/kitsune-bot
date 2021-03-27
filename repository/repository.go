@@ -13,12 +13,20 @@ type MangaRepository interface {
 	GetMangas(max int, page int) ([]*models.Manga, error)
 }
 
+type ChapterRepository interface {
+	CreateChapter(mangaId int, chapter float32, pages int) (int, error)
+	DeleteChapter(chapterId int) error
+	HasChapter(chapterId int) bool
+}
+
 type Repository struct {
 	MangaRepository
+	ChapterRepository
 }
 
 func NewRepository(db *sqlx.DB) *Repository {
 	return &Repository{
-		MangaRepository: NewMangaRepositoryPostgres(db),
+		MangaRepository:   NewMangaRepositoryPostgres(db),
+		ChapterRepository: NewChapterRepositoryPostgres(db),
 	}
 }

@@ -11,6 +11,7 @@ type Owner struct {
 	UserId    string          `json:"user_id" db:"user_id"`
 	PageStart int             `json:"page_start" db:"page_start"`
 	PageEnd   int             `json:"page_end" db:"page_end"`
+	Type      WorkType        `json:"work_type" db:"work_type"`
 	Status    OwnerPageStatus `json:"status" db:"status"`
 }
 
@@ -32,17 +33,19 @@ const (
 	Done = iota
 	InProgress
 	OnCheck
+	OnCompletion
 )
 
 var ownerPageStatusToString = map[OwnerPageStatus]string{
-	Done:       "Готово",
-	InProgress: "В процессе",
-	OnCheck:    "На проверке",
+	Done:         "Готово",
+	InProgress:   "В процессе",
+	OnCheck:      "На проверке",
+	OnCompletion: "На доработке",
 }
 
 func IsValidOwnerPageStatus(id OwnerPageStatus) bool {
 	switch id {
-	case Done, InProgress, OnCheck:
+	case Done, InProgress, OnCheck, OnCompletion:
 		return true
 	}
 	return false

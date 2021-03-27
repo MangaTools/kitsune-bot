@@ -8,49 +8,111 @@ import (
 	"strconv"
 )
 
-func (h *Handler) CreateManga(session *discordgo.Session, create *discordgo.MessageCreate, c *router.RouterContext) {
-	if len(c.Args) < 1 {
-		session.ChannelMessageSend(create.ChannelID, "Невозможно создать мангу без имени.")
-		return
+func (h *Handler) RegisterMangaCommands(r *router.Router) {
+	commands := []router.OnMessageCommand{
+		{
+			BaseCommand: router.BaseCommand{
+				Name:        "манга создать",
+				Description: "Создаёт новую мангу в списке.",
+				GroupName:   "Манга",
+				HelpText:    "манга создать <Имя> - добавляет новую мангу в список возможных для перевода.",
+			},
+			Handler: h.CreateManga,
+		},
+		{
+			BaseCommand: router.BaseCommand{
+				Name:        "манга удалить",
+				Description: "Удаляет мангу из списка.",
+				GroupName:   "Манга",
+				HelpText:    "манга удалить <ID> - удаляет мангу из списка возможных для перевода.",
+			},
+			Handler: h.DeleteManga,
+		},
+		{
+			BaseCommand: router.BaseCommand{
+				Name:        "манга статусы",
+				Description: "позволяет увидеть все доступные для манги статусы",
+				GroupName:   "Манга",
+				HelpText:    "манга статусы - позволяет увидеть все доступные для манги статусы",
+			},
+			Handler: h.GetMangaStatuses,
+		},
+		{
+			BaseCommand: router.BaseCommand{
+				Name:        "манга лист",
+				Description: "позволяет увидеть несколько манг",
+				GroupName:   "Манга",
+				HelpText:    "манга лист <страница(опционально, по умолчанию 1)> - позволяет увидеть до 10 манг на странице",
+			},
+			Handler: h.ListManga,
+		},
+		{
+			BaseCommand: router.BaseCommand{
+				Name:        "манга показать",
+				Description: "позволяет увидеть конкретную мангу",
+				GroupName:   "Манга",
+				HelpText:    "манга показать <ID> - позволяет увидеть конкретную мангу",
+			},
+			Handler: h.ShowManga,
+		},
 	}
-	name := c.StartText
-	id, err := h.services.MangaMethods.AddManga(name)
+
+	r.RegisterOnMessageCommands(commands)
+}
+
+type createMangaArgs struct {
+	Name string `validate:"min=1"`
+}
+
+func (h *Handler) CreateManga(session *discordgo.Session, create *discordgo.MessageCreate, c *router.RouterContext) {
+	args := new(createMangaArgs)
+
+	err := CreateFromStringArgs([]string{c.StartText}, args)
 	if err != nil {
 		session.ChannelMessageSend(create.ChannelID, err.Error())
 		return
 	}
-	session.ChannelMessageSend(create.ChannelID, fmt.Sprintf("Создана манга %s с ID=%d", name, id))
+	err = Validator.Struct(args)
+	if err != nil {
+		session.ChannelMessageSend(create.ChannelID, err.Error())
+		return
+	}
+	id, err := h.services.MangaMethods.AddManga(args.Name)
+	if err != nil {
+		session.ChannelMessageSend(create.ChannelID, err.Error())
+		return
+	}
+
+	session.ChannelMessageSend(create.ChannelID, fmt.Sprintf("Создана манга %s с ID=%d", args.Name, id))
+}
+
+type idMangaArgs struct {
+	Id int
 }
 
 func (h *Handler) DeleteManga(session *discordgo.Session, create *discordgo.MessageCreate, c *router.RouterContext) {
-	if len(c.Args) < 1 {
-		session.ChannelMessageSend(create.ChannelID, "Невозможно удалить мангу без ID.")
-		return
-	}
-	id, err := strconv.Atoi(c.Args[0])
-	if err != nil {
-		session.ChannelMessageSend(create.ChannelID, "Входные данные - не число.")
-		return
-	}
-	err = h.services.MangaMethods.DeleteManga(id)
+	args := new(idMangaArgs)
+	err := CreateFromStringArgs(c.Args, args)
 	if err != nil {
 		session.ChannelMessageSend(create.ChannelID, err.Error())
 		return
 	}
-	session.ChannelMessageSend(create.ChannelID, fmt.Sprintf("Манга с ID %d удалена.", id))
+	err = h.services.MangaMethods.DeleteManga(args.Id)
+	if err != nil {
+		session.ChannelMessageSend(create.ChannelID, err.Error())
+		return
+	}
+	session.ChannelMessageSend(create.ChannelID, fmt.Sprintf("Манга с ID %d удалена.", args.Id))
 }
 
 func (h *Handler) ShowManga(session *discordgo.Session, create *discordgo.MessageCreate, c *router.RouterContext) {
-	if len(c.Args) < 1 {
-		session.ChannelMessageSend(create.ChannelID, "Невозможно показать мангу без ID.")
-		return
-	}
-	id, err := strconv.Atoi(c.Args[0])
+	args := new(idMangaArgs)
+	err := CreateFromStringArgs(c.Args, args)
 	if err != nil {
-		session.ChannelMessageSend(create.ChannelID, "Входные данные - не число.")
+		session.ChannelMessageSend(create.ChannelID, err.Error())
 		return
 	}
-	manga, err := h.services.MangaMethods.GetManga(id)
+	manga, err := h.services.MangaMethods.GetManga(args.Id)
 	if err != nil {
 		session.ChannelMessageSend(create.ChannelID, err.Error())
 		return

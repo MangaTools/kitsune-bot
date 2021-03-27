@@ -39,6 +39,12 @@ func (r *Router) RegisterOnMessageCommand(command OnMessageCommand) {
 	r.routs[name] = command
 }
 
+func (r *Router) RegisterOnMessageCommands(commands []OnMessageCommand) {
+	for _, c := range commands {
+		r.RegisterOnMessageCommand(c)
+	}
+}
+
 func (r *Router) setHelpCommand() {
 	command := OnMessageCommand{
 		BaseCommand: BaseCommand{

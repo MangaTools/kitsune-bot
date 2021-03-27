@@ -12,12 +12,19 @@ type MangaMethods interface {
 	GetMangas(page int) ([]*models.Manga, error)
 }
 
+type ChapterMethods interface {
+	AddChapter(mangaId int, chapter float32, pages int) (int, error)
+	DeleteChapter(chapterId int) error
+}
+
 type Service struct {
 	MangaMethods
+	ChapterMethods
 }
 
 func NewService(r *repository.Repository) *Service {
 	return &Service{
-		MangaMethods: NewMangaService(r),
+		MangaMethods:   NewMangaService(r.MangaRepository),
+		ChapterMethods: NewChapterService(r.ChapterRepository, r.MangaRepository),
 	}
 }
