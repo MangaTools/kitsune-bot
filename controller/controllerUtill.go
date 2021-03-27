@@ -41,7 +41,7 @@ func CreateFromStringArgs(args []string, obj interface{}) error {
 	structVal := val.Elem()
 	if structVal.NumField() > len(args) {
 		logrus.Error(badArgsCount{
-			structArgs: val.NumField(),
+			structArgs: structVal.NumField(),
 			inputArgs:  len(args),
 		})
 		return errors.New(fmt.Sprintf("Недостаточно аргументов, нужно %d, получено %d", structVal.NumField(), len(args)))
