@@ -19,14 +19,23 @@ type ChapterRepository interface {
 	HasChapter(chapterId int) bool
 }
 
+type UserRepository interface {
+	CreateUser(userId string, username string) (*models.User, error)
+	GetUser(userId string) (*models.User, error)
+	HasUser(userId string) bool
+	GetTopUsers(characteristic string) ([]*models.User, error)
+}
+
 type Repository struct {
 	MangaRepository
 	ChapterRepository
+	UserRepository
 }
 
 func NewRepository(db *sqlx.DB) *Repository {
 	return &Repository{
 		MangaRepository:   NewMangaRepositoryPostgres(db),
 		ChapterRepository: NewChapterRepositoryPostgres(db),
+		UserRepository:    NewUserRepositoryPostgres(db),
 	}
 }

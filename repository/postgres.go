@@ -18,6 +18,7 @@ type Config struct {
 const (
 	mangaTable   = "manga"
 	chapterTable = "chapter"
+	userTable    = "user"
 )
 
 // Constructor Postgres db

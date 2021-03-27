@@ -15,7 +15,7 @@ func NewChapterService(chapterRepo repository.ChapterRepository, mangaRepo repos
 }
 
 func (c ChapterService) AddChapter(mangaId int, chapter float32, pages int) (int, error) {
-	if c.mangaRepo.HasManga(mangaId) {
+	if !c.mangaRepo.HasManga(mangaId) {
 		return -1, errors.New("Манги с таким ID не существует.")
 	}
 	chapterId, err := c.chapterRepo.CreateChapter(mangaId, chapter, pages)

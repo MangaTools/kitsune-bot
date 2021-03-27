@@ -23,6 +23,7 @@ func (h *Handler) InitRouts(session *discordgo.Session) {
 	h.RegisterMangaCommands(r)
 	h.RegisterChapterCommands(r)
 	h.RegisterWorkCommands(r)
+	h.RegisterUserCommands(r)
 
 	r.Start()
 }

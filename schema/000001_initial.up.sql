@@ -18,6 +18,7 @@ CREATE TABLE chapter
 CREATE TABLE "user"
 (
     id               varchar(64) unique,
+    username        varchar(255),
     score            int,
     translated_pages int,
     edited_pages     int,
@@ -38,4 +39,8 @@ CREATE TABLE owner
     work_type  varchar(64),
     PRIMARY KEY (id)
 );
+
+
+
+
 

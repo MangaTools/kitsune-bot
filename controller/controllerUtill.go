@@ -37,9 +37,11 @@ func FillAndValidateStruct(object interface{}, args []string) error {
 	if err != nil {
 		return err
 	}
-	err = Validator.Struct(args)
+
+	err = Validator.Struct(object)
 	if err != nil {
-		return err
+		logrus.Error(err)
+		return errors.New("Входные данные не прошли валидацию.")
 	}
 	return nil
 }

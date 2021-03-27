@@ -15,7 +15,7 @@ func (h *Handler) RegisterChapterCommands(r *router.Router) {
 				GroupName:   "Глава",
 				HelpText:    "глава создать <ID манги> <Номер главы> <Кол-во страниц> - создаёт главу для манги, над которой можно работать и бронировать страницы для работы.",
 			},
-			Handler: nil,
+			Handler: h.CreateChapter,
 		},
 		{
 			BaseCommand: router.BaseCommand{
@@ -24,7 +24,7 @@ func (h *Handler) RegisterChapterCommands(r *router.Router) {
 				GroupName:   "Глава",
 				HelpText:    "глава удалить <ID главы> - удаляет главу манги.",
 			},
-			Handler: nil,
+			Handler: h.DeleteChapter,
 		},
 	}
 

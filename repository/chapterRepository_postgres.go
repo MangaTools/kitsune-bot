@@ -13,7 +13,7 @@ type ChapterRepositoryPostgres struct {
 
 func (c ChapterRepositoryPostgres) CreateChapter(mangaId int, chapter float32, pages int) (int, error) {
 	var id int
-	query := fmt.Sprintf("INSERT INTO %s (mangaId, chapter, pages) VALUES($1, $2, $3) RETURNING id", chapterTable)
+	query := fmt.Sprintf("INSERT INTO %s (manga_id, number, pages) VALUES($1, $2, $3) RETURNING id", chapterTable)
 	err := c.db.QueryRow(query, mangaId, chapter, pages).Scan(&id)
 	if err != nil {
 		logrus.Error(err)

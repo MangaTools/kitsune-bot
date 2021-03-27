@@ -17,14 +17,21 @@ type ChapterMethods interface {
 	DeleteChapter(chapterId int) error
 }
 
+type UserMethods interface {
+	GetUser(userId string, username string) (*models.User, error)
+	GetTopUser(characteristic models.UserCharacteristic) ([]*models.User, error)
+}
+
 type Service struct {
 	MangaMethods
 	ChapterMethods
+	UserMethods
 }
 
 func NewService(r *repository.Repository) *Service {
 	return &Service{
 		MangaMethods:   NewMangaService(r.MangaRepository),
 		ChapterMethods: NewChapterService(r.ChapterRepository, r.MangaRepository),
+		UserMethods:    NewUserService(r.UserRepository),
 	}
 }
