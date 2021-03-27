@@ -32,6 +32,18 @@ func (err notPtrError) Error() string {
 	return fmt.Sprintf("%#v isn't ptr", err.Object)
 }
 
+func FillAndValidateStruct(object interface{}, args []string) error {
+	err := CreateFromStringArgs(args, object)
+	if err != nil {
+		return err
+	}
+	err = Validator.Struct(args)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func CreateFromStringArgs(args []string, obj interface{}) error {
 	val := reflect.ValueOf(obj)
 	if val.Kind() != reflect.Ptr {
