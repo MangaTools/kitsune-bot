@@ -8,18 +8,23 @@ import (
 )
 
 type Router struct {
-	session *discordgo.Session
-	Prefix  string
-	routs   map[string]OnMessageCommand
-	groups  map[string][]OnMessageCommand
+	session     *discordgo.Session
+	Prefix      string
+	routs       map[string]OnMessageCommand
+	groups      map[string][]OnMessageCommand
+	middleWares []MiddleWare
 }
+
+// Returns bool, that points, should command execute or not
+type MiddleWare func(session *discordgo.Session, create *discordgo.MessageCreate, ctx *RouterContext, command OnMessageCommand) bool
 
 func NewRouter(session *discordgo.Session, prefix string) *Router {
 	r := &Router{
-		Prefix:  prefix,
-		session: session,
-		routs:   make(map[string]OnMessageCommand),
-		groups:  make(map[string][]OnMessageCommand),
+		Prefix:      prefix,
+		session:     session,
+		routs:       make(map[string]OnMessageCommand),
+		groups:      make(map[string][]OnMessageCommand),
+		middleWares: make([]MiddleWare, 0),
 	}
 	r.setHelpCommand()
 	return r
@@ -58,6 +63,10 @@ func (r *Router) setHelpCommand() {
 	r.RegisterOnMessageCommand(command)
 }
 
+func (r *Router) RegisterMiddleWare(middleWare MiddleWare) {
+	r.middleWares = append(r.middleWares, middleWare)
+}
+
 func (r *Router) handleMessage(session *discordgo.Session, create *discordgo.MessageCreate) {
 	if create.Author.ID == session.State.User.ID {
 		return
@@ -76,7 +85,13 @@ func (r *Router) handleMessage(session *discordgo.Session, create *discordgo.Mes
 		if strings.HasPrefix(lowerText, name) {
 			// remove command text from text content to parse the rest of the line
 			text = strings.TrimSpace(text[len(name):])
-			command.Handler(session, create, NewRouterContext(text))
+			ctx := NewRouterContext(text)
+			for _, m := range r.middleWares {
+				if m(session, create, ctx, command) {
+					return
+				}
+			}
+			command.Handler(session, create, ctx)
 			return
 		}
 	}
