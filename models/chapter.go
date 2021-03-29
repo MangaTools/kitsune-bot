@@ -8,19 +8,17 @@ type ChapterStatus int
 
 const (
 	DoneChapter ChapterStatus = iota
-	FindingPersonsChapter
 	InWorkChapter
 )
 
 var chapterStatusesToString = map[ChapterStatus]string{
-	DoneChapter:           "Готова",
-	FindingPersonsChapter: "Ищем людей",
-	InWorkChapter:         "В процессе",
+	DoneChapter:   "Готова",
+	InWorkChapter: "В процессе",
 }
 
 func IsValidChapterStatus(id ChapterStatus) bool {
 	switch id {
-	case DoneChapter, FindingPersonsChapter, InWorkChapter:
+	case DoneChapter, InWorkChapter:
 		return true
 	}
 	return false
