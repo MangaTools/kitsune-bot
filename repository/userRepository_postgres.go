@@ -16,6 +16,27 @@ func NewUserRepositoryPostgres(db *sqlx.DB) *UserRepositoryPostgres {
 	return &UserRepositoryPostgres{db: db}
 }
 
+var userCharacteristicToDbField = map[models.UserCharacteristic]string{
+	models.UserCharacteristicScore:           "score",
+	models.UserCharacteristicTranslatedPages: "translated_pages",
+	models.UserCharacteristicEditedPages:     "edited_pages",
+	models.UserCharacteristicCheckedPages:    "checked_pages",
+	models.UserCharacteristicCleanedPages:    "cleaned_pages",
+	models.UserCharacteristicTypedPages:      "typed_chapters",
+}
+
+func (u UserRepositoryPostgres) AddToField(userId string, characteristic models.UserCharacteristic, value int) (int, error) {
+	var newValue int
+	field := userCharacteristicToDbField[characteristic]
+	query := fmt.Sprintf("UPDATE %s SET %s=%s+$2 WHERE id=$1 RETURNING %s", userTable, field, field, field)
+	err := u.db.QueryRow(query, userId, value).Scan(&newValue)
+	if err != nil {
+		logrus.Error(err)
+		return -1, errors.New("Не удалось добавить баллы.")
+	}
+	return newValue, nil
+}
+
 func (u UserRepositoryPostgres) CreateUser(userId string, username string) (*models.User, error) {
 	user := new(models.User)
 	query := fmt.Sprintf("INSERT"+

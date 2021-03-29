@@ -25,6 +25,7 @@ type UserRepository interface {
 	GetUser(userId string) (*models.User, error)
 	HasUser(userId string) bool
 	GetTopUsers(characteristic string) ([]*models.User, error)
+	AddToField(userid string, characteristic models.UserCharacteristic, value int) (int, error)
 }
 
 type WorkRepository interface {

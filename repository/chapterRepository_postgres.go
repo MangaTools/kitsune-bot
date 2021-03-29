@@ -25,8 +25,8 @@ func (c ChapterRepositoryPostgres) GetChapter(chapterId int) (*models.Chapter, e
 
 func (c ChapterRepositoryPostgres) CreateChapter(mangaId int, chapter float32, pages int) (int, error) {
 	var id int
-	query := fmt.Sprintf("INSERT INTO %s (manga_id, number, pages) VALUES($1, $2, $3) RETURNING id", chapterTable)
-	err := c.db.QueryRow(query, mangaId, chapter, pages).Scan(&id)
+	query := fmt.Sprintf("INSERT INTO %s (manga_id, number, pages, status) VALUES($1, $2, $3, $4) RETURNING id", chapterTable)
+	err := c.db.QueryRow(query, mangaId, chapter, pages, models.InWorkChapter).Scan(&id)
 	if err != nil {
 		logrus.Error(err)
 		return -1, errors.New("Не удалось создать главу.")
