@@ -11,14 +11,15 @@ CREATE TABLE chapter
     id       serial,
     manga_id int REFERENCES manga (id) ON DELETE CASCADE,
     number   float,
-    pages    int,
+    pages    int2,
+    status   int2,
     PRIMARY KEY (id)
 );
 
 CREATE TABLE "user"
 (
     id               varchar(64) unique,
-    username        varchar(255),
+    username         varchar(255),
     score            int,
     translated_pages int,
     edited_pages     int,
@@ -33,8 +34,8 @@ CREATE TABLE owner
     id         serial,
     user_id    varchar(64) REFERENCES "user" (id) ON DELETE CASCADE,
     chapter_id int references chapter (id) On DELETE CASCADE,
-    page_start int,
-    page_end   int,
+    page_start int2,
+    page_end   int2,
     status     int2,
     work_type  int2,
     PRIMARY KEY (id)
