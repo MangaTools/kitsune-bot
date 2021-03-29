@@ -23,7 +23,6 @@ CREATE TABLE "user"
     score            int,
     translated_pages int,
     edited_pages     int,
-    checked_pages    int,
     cleaned_pages    int,
     typed_chapters   int,
     PRIMARY KEY (id)

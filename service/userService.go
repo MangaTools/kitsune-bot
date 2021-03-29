@@ -10,6 +10,17 @@ type UserService struct {
 	repo repository.UserRepository
 }
 
+func (u UserService) TryCreateUser(userId string, username string) error {
+	if u.repo.HasUser(userId) {
+		return nil
+	}
+	_, err := u.repo.CreateUser(userId, username)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (u UserService) GetUser(userId string, username string) (*models.User, error) {
 	var (
 		user *models.User
@@ -32,7 +43,6 @@ var userCharacteristicToDBField = map[models.UserCharacteristic]string{
 	models.UserCharacteristicScore:           "score",
 	models.UserCharacteristicTranslatedPages: "translated_pages",
 	models.UserCharacteristicEditedPages:     "edited_pages",
-	models.UserCharacteristicCheckedPages:    "checked_pages",
 	models.UserCharacteristicCleanedPages:    "cleaned_pages",
 	models.UserCharacteristicTypedPages:      "typed_chapters",
 }

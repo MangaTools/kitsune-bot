@@ -84,8 +84,6 @@ func (h *Handler) GetUserTop(session *discordgo.Session, create *discordgo.Messa
 			resultText += fmt.Sprintf("Топ %d: %s - %d\n", i+1, user.Username, user.TranslatedPages)
 		case models.UserCharacteristicEditedPages:
 			resultText += fmt.Sprintf("Топ %d: %s - %d\n", i+1, user.Username, user.EditedPages)
-		case models.UserCharacteristicCheckedPages:
-			resultText += fmt.Sprintf("Топ %d: %s - %d\n", i+1, user.Username, user.CheckedPages)
 		case models.UserCharacteristicCleanedPages:
 			resultText += fmt.Sprintf("Топ %d: %s - %d\n", i+1, user.Username, user.CleanedPages)
 		case models.UserCharacteristicTypedPages:
