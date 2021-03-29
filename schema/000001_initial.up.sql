@@ -2,7 +2,7 @@ CREATE TABLE manga
 (
     id     serial not null unique,
     name   varchar(512) unique,
-    status varchar(128),
+    status int2,
     PRIMARY KEY (id)
 );
 
@@ -35,8 +35,8 @@ CREATE TABLE owner
     chapter_id int references chapter (id) On DELETE CASCADE,
     page_start int,
     page_end   int,
-    status     varchar(64),
-    work_type  varchar(64),
+    status     int2,
+    work_type  int2,
     PRIMARY KEY (id)
 );
 

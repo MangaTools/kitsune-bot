@@ -27,7 +27,12 @@ var userCharacteristicToString = map[UserCharacteristic]string{
 
 func IsValidUserCharacteristic(id UserCharacteristic) bool {
 	switch id {
-	case Clean, Edit, Type, Translate:
+	case UserCharacteristicScore,
+		UserCharacteristicTranslatedPages,
+		UserCharacteristicEditedPages,
+		UserCharacteristicCheckedPages,
+		UserCharacteristicCleanedPages,
+		UserCharacteristicTypedPages:
 		return true
 	}
 	return false

@@ -22,10 +22,18 @@ type UserMethods interface {
 	GetTopUser(characteristic models.UserCharacteristic) ([]*models.User, error)
 }
 
+type WorkMethods interface {
+	CheckWork(workId int) error
+	BookWork(userId string, chapterId int, workType models.WorkType, startPage int, endPage int) (int, error)
+	RemoveBookedWork(workId int) error
+	DoneWork(workId int) error
+}
+
 type Service struct {
 	MangaMethods
 	ChapterMethods
 	UserMethods
+	WorkMethods
 }
 
 func NewService(r *repository.Repository) *Service {
@@ -33,5 +41,6 @@ func NewService(r *repository.Repository) *Service {
 		MangaMethods:   NewMangaService(r.MangaRepository),
 		ChapterMethods: NewChapterService(r.ChapterRepository, r.MangaRepository),
 		UserMethods:    NewUserService(r.UserRepository),
+		WorkMethods:    NewWorkService(r.WorkRepository, r.ChapterRepository),
 	}
 }

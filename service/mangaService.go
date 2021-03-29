@@ -26,7 +26,7 @@ func (m MangaService) DeleteManga(id int) error {
 	if m.HasManga(id) {
 		return m.repo.DeleteManga(id)
 	}
-	return errors.New("Манги с таким Id не существует.")
+	return errors.New("Манги с таким ChapterId не существует.")
 }
 
 func (m MangaService) HasManga(id int) bool {
@@ -37,7 +37,7 @@ func (m MangaService) GetManga(id int) (*models.Manga, error) {
 	if m.HasManga(id) {
 		return m.repo.GetManga(id)
 	}
-	return nil, errors.New("Манги с таким Id не существует.")
+	return nil, errors.New("Манги с таким ChapterId не существует.")
 }
 
 func (m MangaService) GetMangas(page int) ([]*models.Manga, error) {

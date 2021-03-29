@@ -67,7 +67,7 @@ type createMangaArgs struct {
 func (h *Handler) CreateManga(session *discordgo.Session, create *discordgo.MessageCreate, c *router.RouterContext) {
 	args := new(createMangaArgs)
 
-	err := FillAndValidateStruct(args, c.Args)
+	err := FillAndValidateStruct(args, []string{c.StartText})
 	if err != nil {
 		session.ChannelMessageSend(create.ChannelID, err.Error())
 		return

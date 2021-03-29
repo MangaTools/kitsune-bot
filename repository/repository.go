@@ -17,6 +17,7 @@ type ChapterRepository interface {
 	CreateChapter(mangaId int, chapter float32, pages int) (int, error)
 	DeleteChapter(chapterId int) error
 	HasChapter(chapterId int) bool
+	GetChapter(chapterId int) (*models.Chapter, error)
 }
 
 type UserRepository interface {
@@ -26,10 +27,21 @@ type UserRepository interface {
 	GetTopUsers(characteristic string) ([]*models.User, error)
 }
 
+type WorkRepository interface {
+	GetWork(workId int) (*models.Owner, error)
+	GetWorksByWorkType(chapterId int, workType models.WorkType) ([]*models.Owner, error)
+	CreateWork(userId string, chapterId int, pageStart int, pageEnd int, workType models.WorkType) (int, error)
+	SetWorkStatus(workId int, status models.OwnerPageStatus) error
+	DeleteWork(workId int) error
+	HasWork(workId int) bool
+	MergeWorks([][]*models.Owner) error
+}
+
 type Repository struct {
 	MangaRepository
 	ChapterRepository
 	UserRepository
+	WorkRepository
 }
 
 func NewRepository(db *sqlx.DB) *Repository {
@@ -37,5 +49,6 @@ func NewRepository(db *sqlx.DB) *Repository {
 		MangaRepository:   NewMangaRepositoryPostgres(db),
 		ChapterRepository: NewChapterRepositoryPostgres(db),
 		UserRepository:    NewUserRepositoryPostgres(db),
+		WorkRepository:    NewWorkRepositoryPostgres(db),
 	}
 }

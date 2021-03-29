@@ -8,6 +8,7 @@ type WorkType int
 
 type Owner struct {
 	Id        int             `json:"id" db:"id"`
+	ChapterId int             `json:"chapter_id" db:"chapter_id"`
 	UserId    string          `json:"user_id" db:"user_id"`
 	PageStart int             `json:"page_start" db:"page_start"`
 	PageEnd   int             `json:"page_end" db:"page_end"`
@@ -16,7 +17,7 @@ type Owner struct {
 }
 
 const (
-	Clean = iota
+	Clean WorkType = iota
 	Edit
 	Type
 	Translate
@@ -30,7 +31,7 @@ var workTypeToString = map[WorkType]string{
 }
 
 const (
-	Done = iota
+	Done OwnerPageStatus = iota
 	InProgress
 	OnCheck
 	OnCompletion

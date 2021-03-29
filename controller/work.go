@@ -1,6 +1,11 @@
 package controller
 
-import "github.com/ShaDream/kitsune-bot/router"
+import (
+	"fmt"
+	"github.com/ShaDream/kitsune-bot/models"
+	"github.com/ShaDream/kitsune-bot/router"
+	"github.com/bwmarrin/discordgo"
+)
 
 func (h *Handler) RegisterWorkCommands(r *router.Router) {
 	commands := []router.OnMessageCommand{
@@ -11,7 +16,7 @@ func (h *Handler) RegisterWorkCommands(r *router.Router) {
 				GroupName:   "Работа",
 				HelpText:    "глава проверить <ID работы> - выставляет работу на проверку. Пользуйтесь этой командой, только если вы сделаны страницы, указанные в работе.",
 			},
-			Handler: nil,
+			Handler: h.CheckWork,
 		},
 		{
 			BaseCommand: router.BaseCommand{
@@ -19,9 +24,9 @@ func (h *Handler) RegisterWorkCommands(r *router.Router) {
 				Description: "Бронирует указанные страницы для работы",
 				GroupName:   "Работа",
 				HelpText: "глава бронь <ID главы> <Вид работы> <Начальная страница> <Конечная страница> - Бронирует главу для работы." +
-					" После брони можете приступать к работе. Для того, чтобы узнать, какой номер у вида работы, выполните команду глава виды работы",
+					" После брони можете приступать к работе. Для того, чтобы узнать, какой номер у вида работы, выполните команду работа виды",
 			},
-			Handler: nil,
+			Handler: h.BookWork,
 		},
 		{
 			BaseCommand: router.BaseCommand{
@@ -30,7 +35,7 @@ func (h *Handler) RegisterWorkCommands(r *router.Router) {
 				GroupName:   "Работа",
 				HelpText:    "главы убрать бронь <ID работы> - убирает бронь с работы. Работает только если работа находиться в статусе \"В процессе\"",
 			},
-			Handler: nil,
+			Handler: h.RemoveBookedWork,
 		},
 		{
 			BaseCommand: router.BaseCommand{
@@ -39,9 +44,94 @@ func (h *Handler) RegisterWorkCommands(r *router.Router) {
 				GroupName:   "Работа",
 				HelpText:    "работа сделано <ID работы> - Переводит статус работы в \"Готово\". Работает только с работами, чей статус равен \"На проверке\"",
 			},
-			Handler: nil,
+			Handler: h.DoneWork,
+		},
+		{
+			BaseCommand: router.BaseCommand{
+				Name:        "работа виды",
+				Description: "Показывает все доступные виды работ",
+				GroupName:   "Работа",
+				HelpText:    "работа виды - показывает все доступные виды работ",
+			},
+			Handler: h.GetWorkTypes,
 		},
 	}
 
 	r.RegisterOnMessageCommands(commands)
+}
+
+type workIdArgs struct {
+	ChapterId int
+}
+
+func (h *Handler) CheckWork(session *discordgo.Session, create *discordgo.MessageCreate, c *router.RouterContext) {
+	args := new(workIdArgs)
+	err := FillAndValidateStruct(args, c.Args)
+	if err != nil {
+		session.ChannelMessageSend(create.ChannelID, err.Error())
+		return
+	}
+
+	err = h.services.WorkMethods.CheckWork(args.ChapterId)
+}
+
+type bookWorkArgs struct {
+	ChapterId int
+	Type      models.WorkType `validate:"min=0,max=3"`
+	StartPage int             `validate:"min=1"`
+	EndPage   int             `validate:"gtefield=StartPage"`
+}
+
+func (h *Handler) BookWork(session *discordgo.Session, create *discordgo.MessageCreate, c *router.RouterContext) {
+	args := new(bookWorkArgs)
+	err := FillAndValidateStruct(args, c.Args)
+	if err != nil {
+		session.ChannelMessageSend(create.ChannelID, err.Error())
+		return
+	}
+
+	work, err := h.services.WorkMethods.BookWork(create.Author.ID, args.ChapterId, args.Type, args.StartPage, args.EndPage)
+	if err != nil {
+		session.ChannelMessageSend(create.ChannelID, err.Error())
+		return
+	}
+	session.ChannelMessageSend(create.ChannelID, fmt.Sprintf("Зарезервировано c Id=%d", work))
+}
+
+func (h *Handler) RemoveBookedWork(session *discordgo.Session, create *discordgo.MessageCreate, c *router.RouterContext) {
+	args := new(workIdArgs)
+	err := FillAndValidateStruct(args, c.Args)
+	if err != nil {
+		session.ChannelMessageSend(create.ChannelID, err.Error())
+		return
+	}
+
+	err = h.services.WorkMethods.RemoveBookedWork(args.ChapterId)
+	if err != nil {
+		session.ChannelMessageSend(create.ChannelID, err.Error())
+		return
+	}
+
+	session.ChannelMessageSend(create.ChannelID, "Резервирование убрано!")
+}
+
+func (h *Handler) DoneWork(session *discordgo.Session, create *discordgo.MessageCreate, c *router.RouterContext) {
+	args := new(workIdArgs)
+	err := FillAndValidateStruct(args, c.Args)
+	if err != nil {
+		session.ChannelMessageSend(create.ChannelID, err.Error())
+		return
+	}
+
+	err = h.services.WorkMethods.DoneWork(args.ChapterId)
+	if err != nil {
+		session.ChannelMessageSend(create.ChannelID, err.Error())
+		return
+	}
+	session.ChannelMessageSend(create.ChannelID, "Работа помечена как готовая!")
+
+}
+
+func (h *Handler) GetWorkTypes(session *discordgo.Session, create *discordgo.MessageCreate, c *router.RouterContext) {
+	session.ChannelMessageSend(create.ChannelID, fmt.Sprintf("Список доступных работ:\n%s", models.GetAllWorkTypesString()))
 }

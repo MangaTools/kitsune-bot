@@ -3,12 +3,24 @@ package repository
 import (
 	"errors"
 	"fmt"
+	"github.com/ShaDream/kitsune-bot/models"
 	"github.com/jmoiron/sqlx"
 	"github.com/sirupsen/logrus"
 )
 
 type ChapterRepositoryPostgres struct {
 	db *sqlx.DB
+}
+
+func (c ChapterRepositoryPostgres) GetChapter(chapterId int) (*models.Chapter, error) {
+	chapter := new(models.Chapter)
+	query := fmt.Sprintf("SELECT id, manga_id, number, pages FROM %s WHERE id = $1", chapterTable)
+	err := c.db.QueryRow(query, chapterId).Scan(&chapter.Id, &chapter.MangaId, &chapter.Number, &chapter.Pages)
+	if err != nil {
+		logrus.Error(err)
+		return nil, errors.New("Не удалось получить главу")
+	}
+	return chapter, nil
 }
 
 func (c ChapterRepositoryPostgres) CreateChapter(mangaId int, chapter float32, pages int) (int, error) {
