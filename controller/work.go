@@ -73,6 +73,11 @@ func (h *Handler) CheckWork(session *discordgo.Session, create *discordgo.Messag
 	}
 
 	err = h.services.WorkMethods.CheckWork(args.ChapterId)
+	if err != nil {
+		session.ChannelMessageSend(create.ChannelID, err.Error())
+		return
+	}
+	session.ChannelMessageSend(create.ChannelID, "Работа выставлена на проверку.")
 }
 
 type bookWorkArgs struct {

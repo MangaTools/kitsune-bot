@@ -11,6 +11,7 @@ import (
 type WorkService struct {
 	repo        repository.WorkRepository
 	chapterRepo repository.ChapterRepository
+	userRepo    repository.UserRepository
 }
 
 func (w WorkService) CheckWork(workId int) error {
@@ -72,6 +73,13 @@ func (w WorkService) RemoveBookedWork(workId int) error {
 	return nil
 }
 
+var workTypeToUserCharacteristic = map[models.WorkType]models.UserCharacteristic{
+	models.Clean:     models.UserCharacteristicCleanedPages,
+	models.Edit:      models.UserCharacteristicEditedPages,
+	models.Type:      models.UserCharacteristicTypedPages,
+	models.Translate: models.UserCharacteristicTranslatedPages,
+}
+
 func (w WorkService) DoneWork(workId int) error {
 	if !w.repo.HasWork(workId) {
 		return errors.New("Такой работы не существует!")
@@ -92,6 +100,14 @@ func (w WorkService) DoneWork(workId int) error {
 		return err
 	}
 	err = w.mergeIfCan(works)
+	if err != nil {
+		return err
+	}
+	_, err = w.userRepo.AddToField(work.UserId, workTypeToUserCharacteristic[work.Type], work.PageEnd-work.PageStart+1)
+	if err != nil {
+		return err
+	}
+	_, err = w.userRepo.AddToField(work.UserId, models.UserCharacteristicScore, work.PageEnd-work.PageStart+1)
 	if err != nil {
 		return err
 	}
@@ -182,9 +198,10 @@ func groupBooksByOwner(books []*models.Owner) map[string][]*models.Owner {
 	return result
 }
 
-func NewWorkService(repo repository.WorkRepository, chapterRepo repository.ChapterRepository) *WorkService {
+func NewWorkService(repo repository.WorkRepository, chapterRepo repository.ChapterRepository, userRepo repository.UserRepository) *WorkService {
 	return &WorkService{
 		repo:        repo,
 		chapterRepo: chapterRepo,
+		userRepo:    userRepo,
 	}
 }

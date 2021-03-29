@@ -20,6 +20,7 @@ type ChapterMethods interface {
 type UserMethods interface {
 	GetUser(userId string, username string) (*models.User, error)
 	GetTopUser(characteristic models.UserCharacteristic) ([]*models.User, error)
+	TryCreateUser(userId string, username string) error
 }
 
 type WorkMethods interface {
@@ -41,6 +42,6 @@ func NewService(r *repository.Repository) *Service {
 		MangaMethods:   NewMangaService(r.MangaRepository),
 		ChapterMethods: NewChapterService(r.ChapterRepository, r.MangaRepository),
 		UserMethods:    NewUserService(r.UserRepository),
-		WorkMethods:    NewWorkService(r.WorkRepository, r.ChapterRepository),
+		WorkMethods:    NewWorkService(r.WorkRepository, r.ChapterRepository, r.UserRepository),
 	}
 }
