@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"database/sql"
 	"github.com/ShaDream/kitsune-bot/models"
 	"github.com/jmoiron/sqlx"
 )
@@ -37,12 +38,18 @@ type WorkRepository interface {
 	HasWork(workId int) bool
 	MergeWorks([][]*models.Owner) error
 }
+type TransactionRepository interface {
+	BeginTransaction() (*sql.Tx, error)
+	Commit(tx *sql.Tx) error
+	Rollback(tx *sql.Tx) error
+}
 
 type Repository struct {
 	MangaRepository
 	ChapterRepository
 	UserRepository
 	WorkRepository
+	TransactionRepository
 }
 
 func NewRepository(db *sqlx.DB) *Repository {
