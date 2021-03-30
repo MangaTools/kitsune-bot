@@ -6,19 +6,18 @@ import (
 )
 
 type ChapterService struct {
-	chapterRepo repository.ChapterRepository
-	mangaRepo   repository.MangaRepository
+	repo repository.Repository
 }
 
-func NewChapterService(chapterRepo repository.ChapterRepository, mangaRepo repository.MangaRepository) *ChapterService {
-	return &ChapterService{chapterRepo: chapterRepo, mangaRepo: mangaRepo}
+func NewChapterService(chapterRepo repository.Repository) *ChapterService {
+	return &ChapterService{chapterRepo}
 }
 
 func (c ChapterService) AddChapter(mangaId int, chapter float32, pages int) (int, error) {
-	if !c.mangaRepo.HasManga(mangaId) {
+	if !c.repo.MangaRepository.HasManga(mangaId) {
 		return -1, errors.New("Манги с таким ID не существует.")
 	}
-	chapterId, err := c.chapterRepo.CreateChapter(mangaId, chapter, pages)
+	chapterId, err := c.repo.ChapterRepository.CreateChapter(mangaId, chapter, pages)
 	if err != nil {
 		return -1, err
 	}
@@ -26,10 +25,10 @@ func (c ChapterService) AddChapter(mangaId int, chapter float32, pages int) (int
 }
 
 func (c ChapterService) DeleteChapter(chapterId int) error {
-	if !c.chapterRepo.HasChapter(chapterId) {
+	if !c.repo.ChapterRepository.HasChapter(chapterId) {
 		return errors.New("Главы с таким ID не существует.")
 	}
-	err := c.chapterRepo.DeleteChapter(chapterId)
+	err := c.repo.ChapterRepository.DeleteChapter(chapterId)
 	if err != nil {
 		return err
 	}

@@ -7,14 +7,14 @@ import (
 )
 
 type UserService struct {
-	repo repository.UserRepository
+	repo repository.Repository
 }
 
 func (u UserService) TryCreateUser(userId string, username string) error {
-	if u.repo.HasUser(userId) {
+	if u.repo.UserRepository.HasUser(userId) {
 		return nil
 	}
-	_, err := u.repo.CreateUser(userId, username)
+	_, err := u.repo.UserRepository.CreateUser(userId, username)
 	if err != nil {
 		return err
 	}
@@ -27,10 +27,10 @@ func (u UserService) GetUser(userId string, username string) (*models.User, erro
 		err  error
 	)
 
-	if !u.repo.HasUser(userId) {
-		user, err = u.repo.CreateUser(userId, username)
+	if !u.repo.UserRepository.HasUser(userId) {
+		user, err = u.repo.UserRepository.CreateUser(userId, username)
 	} else {
-		user, err = u.repo.GetUser(userId)
+		user, err = u.repo.UserRepository.GetUser(userId)
 	}
 
 	if err != nil {
@@ -49,13 +49,13 @@ var userCharacteristicToDBField = map[models.UserCharacteristic]string{
 
 func (u UserService) GetTopUser(characteristic models.UserCharacteristic) ([]*models.User, error) {
 	orderField := userCharacteristicToDBField[characteristic]
-	users, err := u.repo.GetTopUsers(orderField)
+	users, err := u.repo.UserRepository.GetTopUsers(orderField)
 	if err != nil {
 		return nil, errors.New("Не удалось построить топ.")
 	}
 	return users, nil
 }
 
-func NewUserService(repo repository.UserRepository) *UserService {
+func NewUserService(repo repository.Repository) *UserService {
 	return &UserService{repo: repo}
 }

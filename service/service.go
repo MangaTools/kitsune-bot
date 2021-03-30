@@ -39,9 +39,9 @@ type Service struct {
 
 func NewService(r *repository.Repository) *Service {
 	return &Service{
-		MangaMethods:   NewMangaService(r.MangaRepository),
-		ChapterMethods: NewChapterService(r.ChapterRepository, r.MangaRepository),
-		UserMethods:    NewUserService(r.UserRepository),
-		WorkMethods:    NewWorkService(r.WorkRepository, r.ChapterRepository, r.UserRepository),
+		MangaMethods:   NewMangaService(*r),
+		ChapterMethods: NewChapterService(*r),
+		UserMethods:    NewUserService(*r),
+		WorkMethods:    NewWorkService(*r),
 	}
 }

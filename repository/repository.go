@@ -54,9 +54,10 @@ type Repository struct {
 
 func NewRepository(db *sqlx.DB) *Repository {
 	return &Repository{
-		MangaRepository:   NewMangaRepositoryPostgres(db),
-		ChapterRepository: NewChapterRepositoryPostgres(db),
-		UserRepository:    NewUserRepositoryPostgres(db),
-		WorkRepository:    NewWorkRepositoryPostgres(db),
+		MangaRepository:       NewMangaRepositoryPostgres(db),
+		ChapterRepository:     NewChapterRepositoryPostgres(db),
+		UserRepository:        NewUserRepositoryPostgres(db),
+		WorkRepository:        NewWorkRepositoryPostgres(db),
+		TransactionRepository: NewTransactionRepositoryPostgres(db),
 	}
 }

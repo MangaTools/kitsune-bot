@@ -9,9 +9,7 @@ import (
 )
 
 type WorkService struct {
-	repo        repository.WorkRepository
-	chapterRepo repository.ChapterRepository
-	userRepo    repository.UserRepository
+	repo repository.Repository
 }
 
 func (w WorkService) CheckWork(workId int) error {
@@ -33,10 +31,10 @@ func (w WorkService) CheckWork(workId int) error {
 }
 
 func (w WorkService) BookWork(userId string, chapterId int, workType models.WorkType, startPage int, endPage int) (int, error) {
-	if !w.chapterRepo.HasChapter(chapterId) {
+	if !w.repo.ChapterRepository.HasChapter(chapterId) {
 		return -1, errors.New("Главы с таким Id не существует.")
 	}
-	chapter, err := w.chapterRepo.GetChapter(chapterId)
+	chapter, err := w.repo.ChapterRepository.GetChapter(chapterId)
 	if err != nil {
 		return -1, err
 	}
@@ -106,11 +104,11 @@ func (w WorkService) DoneWork(workId int) error {
 }
 
 func (w WorkService) UpdateUserFields(userId string, workType models.WorkType, pages int) error {
-	_, err := w.userRepo.AddToField(userId, workTypeToUserCharacteristic[workType], pages)
+	_, err := w.repo.UserRepository.AddToField(userId, workTypeToUserCharacteristic[workType], pages)
 	if err != nil {
 		return err
 	}
-	_, err = w.userRepo.AddToField(userId, models.UserCharacteristicScore, pages)
+	_, err = w.repo.UserRepository.AddToField(userId, models.UserCharacteristicScore, pages)
 	if err != nil {
 		return err
 	}
@@ -214,10 +212,8 @@ func groupBooksByOwner(books []*models.Owner) map[string][]*models.Owner {
 	return result
 }
 
-func NewWorkService(repo repository.WorkRepository, chapterRepo repository.ChapterRepository, userRepo repository.UserRepository) *WorkService {
+func NewWorkService(repo repository.Repository) *WorkService {
 	return &WorkService{
-		repo:        repo,
-		chapterRepo: chapterRepo,
-		userRepo:    userRepo,
+		repo: repo,
 	}
 }
