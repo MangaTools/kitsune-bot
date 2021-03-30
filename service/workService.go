@@ -81,9 +81,7 @@ var workTypeToUserCharacteristic = map[models.WorkType]models.UserCharacteristic
 }
 
 func (w WorkService) DoneWork(workId int) error {
-	if !w.repo.HasWork(workId) {
-		return errors.New("Такой работы не существует!")
-	}
+
 	work, err := w.repo.GetWork(workId)
 	if err != nil {
 		return err
@@ -95,19 +93,36 @@ func (w WorkService) DoneWork(workId int) error {
 	if err != nil {
 		return err
 	}
-	works, err := w.repo.GetWorksByWorkType(work.ChapterId, work.Type)
+	err = w.mergesWorks(work.ChapterId, work.Type)
+	if err != nil {
+		return err
+	}
+	err = w.UpdateUserFields(work.UserId, work.Type, work.PageEnd-work.PageStart+1)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (w WorkService) UpdateUserFields(userId string, workType models.WorkType, pages int) error {
+	_, err := w.userRepo.AddToField(userId, workTypeToUserCharacteristic[workType], pages)
+	if err != nil {
+		return err
+	}
+	_, err = w.userRepo.AddToField(userId, models.UserCharacteristicScore, pages)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (w WorkService) mergesWorks(chapterId int, workType models.WorkType) error {
+	works, err := w.repo.GetWorksByWorkType(chapterId, workType)
 	if err != nil {
 		return err
 	}
 	err = w.mergeIfCan(works)
-	if err != nil {
-		return err
-	}
-	_, err = w.userRepo.AddToField(work.UserId, workTypeToUserCharacteristic[work.Type], work.PageEnd-work.PageStart+1)
-	if err != nil {
-		return err
-	}
-	_, err = w.userRepo.AddToField(work.UserId, models.UserCharacteristicScore, work.PageEnd-work.PageStart+1)
 	if err != nil {
 		return err
 	}
@@ -139,6 +154,7 @@ func max(x, y int) int {
 	return y
 }
 
+// Merges works if they are done and made by one user
 func (w WorkService) mergeIfCan(books []*models.Owner) error {
 	result := make([][]*models.Owner, 0)
 	books = filterWorkByDone(books)
