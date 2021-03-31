@@ -77,12 +77,16 @@ var workTypeToUserCharacteristic = map[models.WorkType]models.UserCharacteristic
 	models.Translate: models.UserCharacteristicTranslatedPages,
 }
 
-func (w WorkService) DoneWork(workId int) error {
+func (w WorkService) DoneWork(workId int) (err error) {
 	tx, err := w.repo.BeginTransaction()
 	if err != nil {
 		return err
 	}
-	defer w.repo.EndTransaction(*tx)
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+		}
+	}()
 
 	workRepo := repository.NewWorkRepositoryPostgres(tx)
 	userRepo := repository.NewUserRepositoryPostgres(tx)
@@ -116,7 +120,7 @@ func (w WorkService) DoneWork(workId int) error {
 		return err
 	}
 
-	return nil
+	return tx.Commit()
 }
 
 func (w WorkService) canBook(books []*models.Owner, startPage int, endPage int) bool {
