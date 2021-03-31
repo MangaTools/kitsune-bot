@@ -78,8 +78,16 @@ var workTypeToUserCharacteristic = map[models.WorkType]models.UserCharacteristic
 }
 
 func (w WorkService) DoneWork(workId int) error {
+	tx, err := w.repo.BeginTransaction()
+	if err != nil {
+		return err
+	}
+	defer w.repo.EndTransaction(*tx)
 
-	work, err := w.repo.GetWork(workId)
+	workRepo := repository.NewWorkRepositoryPostgres(tx)
+	userRepo := repository.NewUserRepositoryPostgres(tx)
+
+	work, err := workRepo.GetWork(workId)
 	if err != nil {
 		return err
 	}
@@ -87,38 +95,27 @@ func (w WorkService) DoneWork(workId int) error {
 		return errors.New("Работу нельзя пометить готовой, пока она не на проверке!")
 	}
 
-	if err = w.repo.SetWorkStatus(workId, models.Done); err != nil {
-		return err
-	}
-	if err = w.mergesWorks(work.ChapterId, work.Type); err != nil {
-		return err
-	}
-	if err = w.UpdateUserFields(work.UserId, work.Type, work.PageEnd-work.PageStart+1); err != nil {
+	if err = workRepo.SetWorkStatus(workId, models.Done); err != nil {
 		return err
 	}
 
-	return nil
-}
-
-func (w WorkService) UpdateUserFields(userId string, workType models.WorkType, pages int) error {
-	if _, err := w.repo.UserRepository.AddToField(userId, workTypeToUserCharacteristic[workType], pages); err != nil {
-		return err
-	}
-	if _, err := w.repo.UserRepository.AddToField(userId, models.UserCharacteristicScore, pages); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (w WorkService) mergesWorks(chapterId int, workType models.WorkType) error {
-	works, err := w.repo.GetWorksByWorkType(chapterId, workType)
+	works, err := workRepo.GetWorksByWorkType(work.ChapterId, work.Type)
 	if err != nil {
 		return err
 	}
-
 	if err = w.mergeIfCan(works); err != nil {
 		return err
 	}
+
+	pages := work.PageEnd - work.PageStart + 1
+
+	if _, err := userRepo.AddToField(work.UserId, workTypeToUserCharacteristic[work.Type], pages); err != nil {
+		return err
+	}
+	if _, err := userRepo.AddToField(work.UserId, models.UserCharacteristicScore, pages); err != nil {
+		return err
+	}
+
 	return nil
 }
 
