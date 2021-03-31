@@ -23,8 +23,7 @@ func (w WorkService) CheckWork(workId int) error {
 	if work.Status != models.InProgress && work.Status != models.OnCompletion {
 		return errors.New("Работа уже выполнена или на проверке!")
 	}
-	err = w.repo.SetWorkStatus(workId, models.OnCheck)
-	if err != nil {
+	if err = w.repo.SetWorkStatus(workId, models.OnCheck); err != nil {
 		return err
 	}
 	return nil
@@ -87,16 +86,14 @@ func (w WorkService) DoneWork(workId int) error {
 	if work.Status != models.OnCheck {
 		return errors.New("Работу нельзя пометить готовой, пока она не на проверке!")
 	}
-	err = w.repo.SetWorkStatus(workId, models.Done)
-	if err != nil {
+
+	if err = w.repo.SetWorkStatus(workId, models.Done); err != nil {
 		return err
 	}
-	err = w.mergesWorks(work.ChapterId, work.Type)
-	if err != nil {
+	if err = w.mergesWorks(work.ChapterId, work.Type); err != nil {
 		return err
 	}
-	err = w.UpdateUserFields(work.UserId, work.Type, work.PageEnd-work.PageStart+1)
-	if err != nil {
+	if err = w.UpdateUserFields(work.UserId, work.Type, work.PageEnd-work.PageStart+1); err != nil {
 		return err
 	}
 
@@ -104,12 +101,10 @@ func (w WorkService) DoneWork(workId int) error {
 }
 
 func (w WorkService) UpdateUserFields(userId string, workType models.WorkType, pages int) error {
-	_, err := w.repo.UserRepository.AddToField(userId, workTypeToUserCharacteristic[workType], pages)
-	if err != nil {
+	if _, err := w.repo.UserRepository.AddToField(userId, workTypeToUserCharacteristic[workType], pages); err != nil {
 		return err
 	}
-	_, err = w.repo.UserRepository.AddToField(userId, models.UserCharacteristicScore, pages)
-	if err != nil {
+	if _, err := w.repo.UserRepository.AddToField(userId, models.UserCharacteristicScore, pages); err != nil {
 		return err
 	}
 	return nil
@@ -120,8 +115,8 @@ func (w WorkService) mergesWorks(chapterId int, workType models.WorkType) error 
 	if err != nil {
 		return err
 	}
-	err = w.mergeIfCan(works)
-	if err != nil {
+
+	if err = w.mergeIfCan(works); err != nil {
 		return err
 	}
 	return nil
