@@ -4,12 +4,11 @@ import (
 	"errors"
 	"fmt"
 	"github.com/ShaDream/kitsune-bot/models"
-	"github.com/jmoiron/sqlx"
 	"github.com/sirupsen/logrus"
 )
 
 type ChapterRepositoryPostgres struct {
-	db *sqlx.DB
+	db DbWorker
 }
 
 func (c ChapterRepositoryPostgres) GetChapter(chapterId int) (*models.Chapter, error) {
@@ -55,6 +54,6 @@ func (c ChapterRepositoryPostgres) HasChapter(chapterId int) bool {
 	return hasChapter
 }
 
-func NewChapterRepositoryPostgres(db *sqlx.DB) *ChapterRepositoryPostgres {
+func NewChapterRepositoryPostgres(db DbWorker) *ChapterRepositoryPostgres {
 	return &ChapterRepositoryPostgres{db: db}
 }

@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"database/sql"
 	"github.com/ShaDream/kitsune-bot/models"
 	"github.com/jmoiron/sqlx"
 )
@@ -39,9 +38,9 @@ type WorkRepository interface {
 	MergeWorks([][]*models.Owner) error
 }
 type TransactionRepository interface {
-	BeginTransaction() (*sql.Tx, error)
-	Commit(tx *sql.Tx) error
-	Rollback(tx *sql.Tx) error
+	BeginTransaction() (*Transaction, error)
+	Commit(tx Transaction) error
+	Rollback(tx Transaction) error
 }
 
 type Repository struct {

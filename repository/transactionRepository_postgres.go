@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"database/sql"
 	"errors"
 	"github.com/jmoiron/sqlx"
 	"github.com/sirupsen/logrus"
@@ -15,16 +14,16 @@ func NewTransactionRepositoryPostgres(db *sqlx.DB) *TransactionRepositoryPostgre
 	return &TransactionRepositoryPostgres{db: db}
 }
 
-func (t TransactionRepositoryPostgres) BeginTransaction() (*sql.Tx, error) {
-	begin, err := t.db.Begin()
+func (t TransactionRepositoryPostgres) BeginTransaction() (*Transaction, error) {
+	tx, err := t.db.Begin()
 	if err != nil {
 		logrus.Error(err)
 		return nil, errors.New("Не удалось создать транзакцию.")
 	}
-	return begin, nil
+	return NewTransaction(tx), nil
 }
 
-func (t TransactionRepositoryPostgres) Commit(tx *sql.Tx) error {
+func (t TransactionRepositoryPostgres) Commit(tx Transaction) error {
 	if err := tx.Commit(); err != nil {
 		logrus.Error(err)
 		return errors.New("Не удалось сделать коммит транзакции")
@@ -32,7 +31,7 @@ func (t TransactionRepositoryPostgres) Commit(tx *sql.Tx) error {
 	return nil
 }
 
-func (t TransactionRepositoryPostgres) Rollback(tx *sql.Tx) error {
+func (t TransactionRepositoryPostgres) Rollback(tx Transaction) error {
 	if err := tx.Rollback(); err != nil {
 		logrus.Error(err)
 		return errors.New("Не удалось сделать откат транзакции")

@@ -4,12 +4,11 @@ import (
 	"errors"
 	"fmt"
 	"github.com/ShaDream/kitsune-bot/models"
-	"github.com/jmoiron/sqlx"
 	"github.com/sirupsen/logrus"
 )
 
 type MangaRepositoryPostgres struct {
-	db *sqlx.DB
+	db DbWorker
 }
 
 func (m MangaRepositoryPostgres) CreateManga(name string, status models.MangaStatus) (int, error) {
@@ -75,6 +74,6 @@ func (m MangaRepositoryPostgres) GetMangas(max int, page int) ([]*models.Manga, 
 	return mangas, nil
 }
 
-func NewMangaRepositoryPostgres(db *sqlx.DB) *MangaRepositoryPostgres {
+func NewMangaRepositoryPostgres(db DbWorker) *MangaRepositoryPostgres {
 	return &MangaRepositoryPostgres{db: db}
 }

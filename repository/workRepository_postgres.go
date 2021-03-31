@@ -5,13 +5,12 @@ import (
 	"errors"
 	"fmt"
 	"github.com/ShaDream/kitsune-bot/models"
-	"github.com/jmoiron/sqlx"
 	"github.com/sirupsen/logrus"
 	"strings"
 )
 
 type WorkRepositoryPostgres struct {
-	db *sqlx.DB
+	db DbWorker
 }
 
 var (
@@ -97,7 +96,7 @@ func (w WorkRepositoryPostgres) MergeWorks(mergingWorks [][]*models.Owner) error
 	returnedError := errors.New("Произошла ошибка при объединении работ.")
 	for _, works := range mergingWorks {
 		ctx := context.Background()
-		tx, err := w.db.BeginTx(ctx, nil)
+		tx, err := w.db.Begin()
 		if err != nil {
 			logrus.Error(err)
 			return returnedError
@@ -146,6 +145,6 @@ func createDeleteArgs(length int) string {
 	return strings.Join(result, ", ")
 }
 
-func NewWorkRepositoryPostgres(db *sqlx.DB) *WorkRepositoryPostgres {
+func NewWorkRepositoryPostgres(db DbWorker) *WorkRepositoryPostgres {
 	return &WorkRepositoryPostgres{db: db}
 }

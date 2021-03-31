@@ -4,15 +4,14 @@ import (
 	"errors"
 	"fmt"
 	"github.com/ShaDream/kitsune-bot/models"
-	"github.com/jmoiron/sqlx"
 	"github.com/sirupsen/logrus"
 )
 
 type UserRepositoryPostgres struct {
-	db *sqlx.DB
+	db DbWorker
 }
 
-func NewUserRepositoryPostgres(db *sqlx.DB) *UserRepositoryPostgres {
+func NewUserRepositoryPostgres(db DbWorker) *UserRepositoryPostgres {
 	return &UserRepositoryPostgres{db: db}
 }
 
