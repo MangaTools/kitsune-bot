@@ -41,6 +41,7 @@ type TransactionRepository interface {
 	BeginTransaction() (*Transaction, error)
 	Commit(tx Transaction) error
 	Rollback(tx Transaction) error
+	EndTransaction(tx Transaction) error
 }
 
 type Repository struct {

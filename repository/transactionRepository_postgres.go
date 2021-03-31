@@ -14,6 +14,22 @@ func NewTransactionRepositoryPostgres(db *sqlx.DB) *TransactionRepositoryPostgre
 	return &TransactionRepositoryPostgres{db: db}
 }
 
+func (t TransactionRepositoryPostgres) EndTransaction(tx Transaction) (err error) {
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+			return
+		}
+	}()
+
+	if err = t.Commit(tx); err != nil {
+		logrus.Error(err)
+		err = errors.New("Не удалось закончить транзакцию.")
+		return
+	}
+	return
+}
+
 func (t TransactionRepositoryPostgres) BeginTransaction() (*Transaction, error) {
 	tx, err := t.db.Begin()
 	if err != nil {
