@@ -16,10 +16,11 @@ type Config struct {
 }
 
 const (
-	mangaTable   = "manga"
-	chapterTable = "chapter"
-	userTable    = "\"user\""
-	workTable    = "owner"
+	mangaTable       = "manga"
+	chapterTable     = "chapter"
+	userTable        = "\"user\""
+	workTable        = "owner"
+	rolesAccessTable = "roles_access"
 )
 
 // Constructor Postgres db

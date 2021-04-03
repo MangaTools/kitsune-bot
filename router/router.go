@@ -2,6 +2,7 @@ package router
 
 import (
 	"fmt"
+	"github.com/ShaDream/kitsune-bot/models"
 	"github.com/bwmarrin/discordgo"
 	"github.com/sirupsen/logrus"
 	"strings"
@@ -10,20 +11,20 @@ import (
 type Router struct {
 	session     *discordgo.Session
 	Prefix      string
-	routs       map[string]OnMessageCommand
-	groups      map[string][]OnMessageCommand
+	routs       map[string]*OnMessageCommand
+	groups      map[string]*Group
 	middleWares []MiddleWare
 }
 
 // Returns bool, that points, should command execute or not
-type MiddleWare func(session *discordgo.Session, create *discordgo.MessageCreate, ctx *RouterContext, command OnMessageCommand) bool
+type MiddleWare func(session *discordgo.Session, create *discordgo.MessageCreate, ctx *RouterContext, command OnMessageCommand) (cancel bool)
 
 func NewRouter(session *discordgo.Session, prefix string) *Router {
 	r := &Router{
 		Prefix:      prefix,
 		session:     session,
-		routs:       make(map[string]OnMessageCommand),
-		groups:      make(map[string][]OnMessageCommand),
+		routs:       make(map[string]*OnMessageCommand),
+		groups:      make(map[string]*Group),
 		middleWares: make([]MiddleWare, 0),
 	}
 	r.setHelpCommand()
@@ -34,24 +35,30 @@ func (r *Router) Start() {
 	r.session.AddHandler(r.handleMessage)
 }
 
-func (r *Router) RegisterOnMessageCommand(command OnMessageCommand) {
+func (r *Router) RegisterOnMessageCommand(command *OnMessageCommand) {
 	name := command.Name
 	if _, ok := r.groups[command.GroupName]; !ok {
-		r.groups[command.GroupName] = make([]OnMessageCommand, 0)
+		r.groups[command.GroupName] = NewGroup()
 	}
-	r.groups[command.GroupName] = append(r.groups[command.GroupName], command)
+	r.groups[command.GroupName].AddCommand(command)
 
 	r.routs[name] = command
 }
 
-func (r *Router) RegisterOnMessageCommands(commands []OnMessageCommand) {
+func (r *Router) RegisterOnMessageCommands(commands []*OnMessageCommand) {
 	for _, c := range commands {
 		r.RegisterOnMessageCommand(c)
 	}
 }
 
+func (r *Router) SetGroupAccess(groupName string, access models.RoleAccess) {
+	if g, ok := r.groups[groupName]; ok {
+		g.SetGroupAccess(access)
+	}
+}
+
 func (r *Router) setHelpCommand() {
-	command := OnMessageCommand{
+	command := &OnMessageCommand{
 		BaseCommand: BaseCommand{
 			Name:        "помощь",
 			Description: fmt.Sprintf("Показывает вам текущую подсказку. Для подробной информации по какой-либо команде напишите %sпомощь \"название команды\"", r.Prefix),
@@ -87,7 +94,7 @@ func (r *Router) handleMessage(session *discordgo.Session, create *discordgo.Mes
 			text = strings.TrimSpace(text[len(name):])
 			ctx := NewRouterContext(text)
 			for _, m := range r.middleWares {
-				if m(session, create, ctx, command) {
+				if m(session, create, ctx, *command) {
 					return
 				}
 			}
@@ -101,11 +108,13 @@ func (r *Router) handleMessage(session *discordgo.Session, create *discordgo.Mes
 func (r *Router) helpFunction(session *discordgo.Session, create *discordgo.MessageCreate, c *RouterContext) {
 	if len(c.StartText) > 0 {
 		lowered := strings.ToLower(c.StartText)
-		for name, c := range r.routs {
+		for name, command := range r.routs {
 			if strings.HasPrefix(lowered, name) {
-				_, err := session.ChannelMessageSend(create.ChannelID, c.HelpText)
-				if err != nil {
-					logrus.Error(err)
+				if command.CommandAccess <= c.UserAccess {
+					_, err := session.ChannelMessageSend(create.ChannelID, command.HelpText)
+					if err != nil {
+						logrus.Error(err)
+					}
 				}
 				return
 			}
@@ -114,11 +123,16 @@ func (r *Router) helpFunction(session *discordgo.Session, create *discordgo.Mess
 
 	text := ""
 	for groupName, g := range r.groups {
+		if c.UserAccess < g.groupAccess {
+			continue
+		}
 		if groupName != "" {
 			text += fmt.Sprintf("%s:\n", groupName)
 		}
-		for _, c := range g {
-			text += fmt.Sprintf("%s%s - %s\n", r.Prefix, c.Name, c.Description)
+		for _, command := range g.commands {
+			if command.CommandAccess <= c.UserAccess {
+				text += fmt.Sprintf("%s%s - %s\n", r.Prefix, command.Name, command.Description)
+			}
 		}
 		text += "\n"
 	}

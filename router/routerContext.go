@@ -1,6 +1,7 @@
 package router
 
 import (
+	"github.com/ShaDream/kitsune-bot/models"
 	"regexp"
 	"strings"
 )
@@ -8,8 +9,9 @@ import (
 var r = regexp.MustCompile(`(".+")|(\S+)`)
 
 type RouterContext struct {
-	Args      []string
-	StartText string
+	Args       []string
+	StartText  string
+	UserAccess models.RoleAccess
 }
 
 func NewRouterContext(input string) *RouterContext {
@@ -21,7 +23,8 @@ func NewRouterContext(input string) *RouterContext {
 		}
 	}
 	return &RouterContext{
-		Args:      result,
-		StartText: trimmedSpaces,
+		Args:       result,
+		StartText:  trimmedSpaces,
+		UserAccess: models.Reader,
 	}
 }

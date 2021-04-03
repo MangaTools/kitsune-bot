@@ -1,12 +1,16 @@
 package router
 
-import "github.com/bwmarrin/discordgo"
+import (
+	"github.com/ShaDream/kitsune-bot/models"
+	"github.com/bwmarrin/discordgo"
+)
 
 type BaseCommand struct {
-	Name        string
-	Description string
-	GroupName   string
-	HelpText    string
+	Name          string
+	Description   string
+	GroupName     string
+	HelpText      string
+	CommandAccess models.RoleAccess
 }
 
 type OnMessageCommand struct {

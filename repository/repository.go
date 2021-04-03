@@ -37,11 +37,20 @@ type WorkRepository interface {
 	HasWork(workId int) bool
 	MergeWorks([][]*models.Owner) error
 }
+
 type TransactionRepository interface {
 	BeginTransaction() (*Transaction, error)
 	Commit(tx Transaction) error
 	Rollback(tx Transaction) error
 	EndTransaction(tx Transaction) error
+}
+
+type AccessRepository interface {
+	CreateRoleAccess(roleId string, access models.RoleAccess) (*models.Role, error)
+	UpdateRoleAccess(roleId string, newAccess models.RoleAccess) error
+	DeleteRoleAccess(roleId string) error
+	HasRoleAccess(roleId string) bool
+	GetAllRolesAccesses() ([]*models.Role, error)
 }
 
 type Repository struct {
@@ -50,6 +59,7 @@ type Repository struct {
 	UserRepository
 	WorkRepository
 	TransactionRepository
+	AccessRepository
 }
 
 func NewRepository(db *sqlx.DB) *Repository {
@@ -59,5 +69,6 @@ func NewRepository(db *sqlx.DB) *Repository {
 		UserRepository:        NewUserRepositoryPostgres(db),
 		WorkRepository:        NewWorkRepositoryPostgres(db),
 		TransactionRepository: NewTransactionRepositoryPostgres(db),
+		AccessRepository:      NewAccessRepositoryPostgres(db),
 	}
 }

@@ -9,55 +9,61 @@ import (
 )
 
 func (h *Handler) RegisterMangaCommands(r *router.Router) {
-	commands := []router.OnMessageCommand{
+	commands := []*router.OnMessageCommand{
 		{
 			BaseCommand: router.BaseCommand{
-				Name:        "манга создать",
-				Description: "Создаёт новую мангу в списке.",
-				GroupName:   "Манга",
-				HelpText:    "манга создать <Имя> - добавляет новую мангу в список возможных для перевода.",
+				Name:          "манга создать",
+				Description:   "Создаёт новую мангу в списке.",
+				GroupName:     "Манга",
+				HelpText:      "манга создать <Имя> - добавляет новую мангу в список возможных для перевода.",
+				CommandAccess: models.Moderator,
 			},
 			Handler: h.CreateManga,
 		},
 		{
 			BaseCommand: router.BaseCommand{
-				Name:        "манга удалить",
-				Description: "Удаляет мангу из списка.",
-				GroupName:   "Манга",
-				HelpText:    "манга удалить <ID> - удаляет мангу из списка возможных для перевода.",
+				Name:          "манга удалить",
+				Description:   "Удаляет мангу из списка.",
+				GroupName:     "Манга",
+				HelpText:      "манга удалить <ID> - удаляет мангу из списка возможных для перевода.",
+				CommandAccess: models.Moderator,
 			},
 			Handler: h.DeleteManga,
 		},
 		{
 			BaseCommand: router.BaseCommand{
-				Name:        "манга статусы",
-				Description: "позволяет увидеть все доступные для манги статусы",
-				GroupName:   "Манга",
-				HelpText:    "манга статусы - позволяет увидеть все доступные для манги статусы",
+				Name:          "манга статусы",
+				Description:   "позволяет увидеть все доступные для манги статусы",
+				GroupName:     "Манга",
+				HelpText:      "манга статусы - позволяет увидеть все доступные для манги статусы",
+				CommandAccess: models.TeamMember,
 			},
 			Handler: h.GetMangaStatuses,
 		},
 		{
 			BaseCommand: router.BaseCommand{
-				Name:        "манга лист",
-				Description: "позволяет увидеть несколько манг",
-				GroupName:   "Манга",
-				HelpText:    "манга лист <страница(опционально, по умолчанию 1)> - позволяет увидеть до 10 манг на странице",
+				Name:          "манга лист",
+				Description:   "позволяет увидеть несколько манг",
+				GroupName:     "Манга",
+				HelpText:      "манга лист <страница(опционально, по умолчанию 1)> - позволяет увидеть до 10 манг на странице",
+				CommandAccess: models.TeamMember,
 			},
 			Handler: h.ListManga,
 		},
 		{
 			BaseCommand: router.BaseCommand{
-				Name:        "манга показать",
-				Description: "позволяет увидеть конкретную мангу",
-				GroupName:   "Манга",
-				HelpText:    "манга показать <ID> - позволяет увидеть конкретную мангу",
+				Name:          "манга показать",
+				Description:   "позволяет увидеть конкретную мангу",
+				GroupName:     "Манга",
+				HelpText:      "манга показать <ID> - позволяет увидеть конкретную мангу",
+				CommandAccess: models.TeamMember,
 			},
 			Handler: h.ShowManga,
 		},
 	}
 
 	r.RegisterOnMessageCommands(commands)
+	r.SetGroupAccess("Манга", models.TeamMember)
 }
 
 type createMangaArgs struct {

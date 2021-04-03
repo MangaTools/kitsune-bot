@@ -8,37 +8,41 @@ import (
 )
 
 func (h *Handler) RegisterUserCommands(r *router.Router) {
-	commands := []router.OnMessageCommand{
+	commands := []*router.OnMessageCommand{
 		{
 			BaseCommand: router.BaseCommand{
-				Name:        "юзер статистика",
-				Description: "Показывает статистики пользователя.",
-				GroupName:   "Юзер",
-				HelpText:    "юзер статистика - показывает статистику пользователя, который вызвал команду.",
+				Name:          "юзер статистика",
+				Description:   "Показывает статистики пользователя.",
+				GroupName:     "Юзер",
+				HelpText:      "юзер статистика - показывает статистику пользователя, который вызвал команду.",
+				CommandAccess: models.Reader,
 			},
 			Handler: h.GetUserStatistics,
 		},
 		{
 			BaseCommand: router.BaseCommand{
-				Name:        "юзер топ",
-				Description: "Показывает топ пользователей по одной из характеристик.",
-				GroupName:   "Юзер",
-				HelpText:    "юзер топ <характеристика> - показывает топ пользователей по выбранной характеристике. Чтобы узнать, какие есть характеристики введите команду юзер характеристики",
+				Name:          "юзер топ",
+				Description:   "Показывает топ пользователей по одной из характеристик.",
+				GroupName:     "Юзер",
+				HelpText:      "юзер топ <характеристика> - показывает топ пользователей по выбранной характеристике. Чтобы узнать, какие есть характеристики введите команду юзер характеристики",
+				CommandAccess: models.Reader,
 			},
 			Handler: h.GetUserTop,
 		},
 		{
 			BaseCommand: router.BaseCommand{
-				Name:        "юзер характеристики",
-				Description: "Показывает все доступные для пользователя характеристики.",
-				GroupName:   "Юзер",
-				HelpText:    "юзер характеристики - показывает все доступные для пользователя характеристики.",
+				Name:          "юзер характеристики",
+				Description:   "Показывает все доступные для пользователя характеристики.",
+				GroupName:     "Юзер",
+				HelpText:      "юзер характеристики - показывает все доступные для пользователя характеристики.",
+				CommandAccess: models.Reader,
 			},
 			Handler: h.GetUserCharacteristics,
 		},
 	}
 
 	r.RegisterOnMessageCommands(commands)
+	r.SetGroupAccess("Юзер", models.Reader)
 }
 
 func (h *Handler) GetUserStatistics(session *discordgo.Session, create *discordgo.MessageCreate, c *router.RouterContext) {

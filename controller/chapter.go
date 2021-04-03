@@ -2,33 +2,37 @@ package controller
 
 import (
 	"fmt"
+	"github.com/ShaDream/kitsune-bot/models"
 	"github.com/ShaDream/kitsune-bot/router"
 	"github.com/bwmarrin/discordgo"
 )
 
 func (h *Handler) RegisterChapterCommands(r *router.Router) {
-	commands := []router.OnMessageCommand{
+	commands := []*router.OnMessageCommand{
 		{
 			BaseCommand: router.BaseCommand{
-				Name:        "глава создать",
-				Description: "Создаёт главу для манги.",
-				GroupName:   "Глава",
-				HelpText:    "глава создать <ID манги> <Номер главы> <Кол-во страниц> - создаёт главу для манги, над которой можно работать и бронировать страницы для работы.",
+				Name:          "глава создать",
+				Description:   "Создаёт главу для манги.",
+				GroupName:     "Глава",
+				HelpText:      "глава создать <ID манги> <Номер главы> <Кол-во страниц> - создаёт главу для манги, над которой можно работать и бронировать страницы для работы.",
+				CommandAccess: models.Moderator,
 			},
 			Handler: h.CreateChapter,
 		},
 		{
 			BaseCommand: router.BaseCommand{
-				Name:        "глава удалить",
-				Description: "Удаляет главу манги",
-				GroupName:   "Глава",
-				HelpText:    "глава удалить <ID главы> - удаляет главу манги.",
+				Name:          "глава удалить",
+				Description:   "Удаляет главу манги",
+				GroupName:     "Глава",
+				HelpText:      "глава удалить <ID главы> - удаляет главу манги.",
+				CommandAccess: models.Moderator,
 			},
 			Handler: h.DeleteChapter,
 		},
 	}
 
 	r.RegisterOnMessageCommands(commands)
+	r.SetGroupAccess("Глава", models.Moderator)
 }
 
 type createChapterArgs struct {

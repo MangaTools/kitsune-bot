@@ -8,13 +8,14 @@ import (
 )
 
 func (h *Handler) RegisterWorkCommands(r *router.Router) {
-	commands := []router.OnMessageCommand{
+	commands := []*router.OnMessageCommand{
 		{
 			BaseCommand: router.BaseCommand{
-				Name:        "работа проверить",
-				Description: "Ставит статус забронированных страниц для проверки",
-				GroupName:   "Работа",
-				HelpText:    "глава проверить <ID работы> - выставляет работу на проверку. Пользуйтесь этой командой, только если вы сделаны страницы, указанные в работе.",
+				Name:          "работа проверить",
+				Description:   "Ставит статус забронированных страниц для проверки",
+				GroupName:     "Работа",
+				HelpText:      "глава проверить <ID работы> - выставляет работу на проверку. Пользуйтесь этой командой, только если вы сделаны страницы, указанные в работе.",
+				CommandAccess: models.TeamMember,
 			},
 			Handler: h.CheckWork,
 		},
@@ -25,39 +26,44 @@ func (h *Handler) RegisterWorkCommands(r *router.Router) {
 				GroupName:   "Работа",
 				HelpText: "глава бронь <ID главы> <Вид работы> <Начальная страница> <Конечная страница> - Бронирует главу для работы." +
 					" После брони можете приступать к работе. Для того, чтобы узнать, какой номер у вида работы, выполните команду работа виды",
+				CommandAccess: models.TeamMember,
 			},
 			Handler: h.BookWork,
 		},
 		{
 			BaseCommand: router.BaseCommand{
-				Name:        "работа убрать бронь",
-				Description: "Убирает бронь со страниц главы",
-				GroupName:   "Работа",
-				HelpText:    "главы убрать бронь <ID работы> - убирает бронь с работы. Работает только если работа находиться в статусе \"В процессе\"",
+				Name:          "работа убрать бронь",
+				Description:   "Убирает бронь со страниц главы",
+				GroupName:     "Работа",
+				HelpText:      "главы убрать бронь <ID работы> - убирает бронь с работы. Работает только если работа находиться в статусе \"В процессе\"",
+				CommandAccess: models.TeamMember,
 			},
 			Handler: h.RemoveBookedWork,
 		},
 		{
 			BaseCommand: router.BaseCommand{
-				Name:        "работа сделано",
-				Description: "Переводит статус работы в \"Готово\"",
-				GroupName:   "Работа",
-				HelpText:    "работа сделано <ID работы> - Переводит статус работы в \"Готово\". Работает только с работами, чей статус равен \"На проверке\"",
+				Name:          "работа сделано",
+				Description:   "Переводит статус работы в \"Готово\"",
+				GroupName:     "Работа",
+				HelpText:      "работа сделано <ID работы> - Переводит статус работы в \"Готово\". Работает только с работами, чей статус равен \"На проверке\"",
+				CommandAccess: models.Checker,
 			},
 			Handler: h.DoneWork,
 		},
 		{
 			BaseCommand: router.BaseCommand{
-				Name:        "работа виды",
-				Description: "Показывает все доступные виды работ",
-				GroupName:   "Работа",
-				HelpText:    "работа виды - показывает все доступные виды работ",
+				Name:          "работа виды",
+				Description:   "Показывает все доступные виды работ",
+				GroupName:     "Работа",
+				HelpText:      "работа виды - показывает все доступные виды работ",
+				CommandAccess: models.TeamMember,
 			},
 			Handler: h.GetWorkTypes,
 		},
 	}
 
 	r.RegisterOnMessageCommands(commands)
+	r.SetGroupAccess("Работа", models.TeamMember)
 }
 
 type workIdArgs struct {

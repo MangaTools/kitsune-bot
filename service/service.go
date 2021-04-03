@@ -30,11 +30,19 @@ type WorkMethods interface {
 	DoneWork(workId int) error
 }
 
+type AccessMethods interface {
+	SetRoleAccess(roleId string, access models.RoleAccess) error
+	RemoveRoleAccess(roleId string) error
+	HasRoleAccess(roleId string) bool
+	GetAllRoleAccesses() ([]*models.Role, error)
+}
+
 type Service struct {
 	MangaMethods
 	ChapterMethods
 	UserMethods
 	WorkMethods
+	AccessMethods
 }
 
 func NewService(r *repository.Repository) *Service {
@@ -43,5 +51,6 @@ func NewService(r *repository.Repository) *Service {
 		ChapterMethods: NewChapterService(*r),
 		UserMethods:    NewUserService(*r),
 		WorkMethods:    NewWorkService(*r),
+		AccessMethods:  NewAccessService(*r),
 	}
 }

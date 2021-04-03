@@ -40,6 +40,13 @@ CREATE TABLE owner
     PRIMARY KEY (id)
 );
 
+Create TABLE roles_access (
+    id serial,
+    role_id varchar(64),
+    access_level int2,
+    PRIMARY KEY (id)
+);
+
 
 
 
