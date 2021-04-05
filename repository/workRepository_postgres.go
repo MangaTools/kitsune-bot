@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/ShaDream/kitsune-bot/models"
 	"github.com/sirupsen/logrus"
+	"sort"
 	"strings"
 )
 
@@ -23,6 +24,57 @@ var (
 	deleteWorkQuery = fmt.Sprintf("DELETE FROM %s WHERE id=$1", workTable)
 	hasWorkQuery    = fmt.Sprintf("SELECT exists(SELECT * FROM %s WHERE id=$1)", workTable)
 )
+
+func (w WorkRepositoryPostgres) IsChapterDone(chapter models.Chapter) bool {
+	worksByType := map[models.WorkType][]*models.Owner{}
+	query := fmt.Sprintf("SELECT id, user_id, chapter_id, page_start, page_end, status, work_type FROM %s WHERE chapter_id = $1 AND status = 0", workTable)
+	rows, err := w.db.Query(query, chapter.Id)
+	if err != nil {
+		logrus.Error(err)
+		return false
+	}
+	for rows.Next() {
+		work := new(models.Owner)
+		err := rows.Scan(&work.Id, &work.UserId, &work.ChapterId, &work.PageStart, &work.PageEnd, &work.Status, &work.Type)
+		if err != nil {
+			logrus.Error(err)
+			return false
+		}
+
+		if _, ok := worksByType[work.Type]; !ok {
+			worksByType[work.Type] = make([]*models.Owner, 0, 1)
+		}
+		worksByType[work.Type] = append(worksByType[work.Type], work)
+	}
+
+	if len(worksByType) < 4 {
+		return false
+	}
+
+	for _, workSlice := range worksByType {
+		if !isWorksCoverChapter(workSlice, chapter.Pages) {
+			return false
+		}
+	}
+	return true
+}
+
+func isWorksCoverChapter(chapters []*models.Owner, pages int) bool {
+	sort.Slice(chapters, func(i, j int) bool {
+		return chapters[i].PageStart < chapters[j].PageStart
+	})
+	if chapters[0].PageStart != 1 && chapters[len(chapters)-1].PageEnd != pages {
+		return false
+	}
+	for i := 0; i < len(chapters)-1; i++ {
+		chapterLeft := chapters[i]
+		chapterRight := chapters[i+1]
+		if chapterLeft.PageEnd+1 != chapterRight.PageStart {
+			return false
+		}
+	}
+	return true
+}
 
 func (w WorkRepositoryPostgres) SetWorkStatus(workId int, status models.OwnerPageStatus) error {
 	_, err := w.db.Exec(setWorkStatusQuery, status, workId)

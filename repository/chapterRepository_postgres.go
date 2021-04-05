@@ -11,6 +11,16 @@ type ChapterRepositoryPostgres struct {
 	db DbWorker
 }
 
+func (c ChapterRepositoryPostgres) SetChapterStatus(chapterId int, status models.ChapterStatus) error {
+	query := fmt.Sprintf("UPDATE %s SET status=$1 WHERE id=$2", chapterTable)
+	_, err := c.db.Exec(query, status, chapterId)
+	if err != nil {
+		logrus.Error(err)
+		return errors.New("Ошибка при обновлении статуса главы.")
+	}
+	return nil
+}
+
 func (c ChapterRepositoryPostgres) GetChapter(chapterId int) (*models.Chapter, error) {
 	chapter := new(models.Chapter)
 	query := fmt.Sprintf("SELECT id, manga_id, number, pages FROM %s WHERE id = $1", chapterTable)

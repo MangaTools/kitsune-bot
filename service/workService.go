@@ -90,6 +90,7 @@ func (w WorkService) DoneWork(workId int) (err error) {
 
 	workRepo := repository.NewWorkRepositoryPostgres(tx)
 	userRepo := repository.NewUserRepositoryPostgres(tx)
+	chapterRepo := repository.NewChapterRepositoryPostgres(tx)
 
 	work, err := workRepo.GetWork(workId)
 	if err != nil {
@@ -109,6 +110,16 @@ func (w WorkService) DoneWork(workId int) (err error) {
 	}
 	if err = w.mergeIfCan(works); err != nil {
 		return err
+	}
+	chapter, err := chapterRepo.GetChapter(work.ChapterId)
+	if err != nil {
+		return err
+	}
+	if workRepo.IsChapterDone(*chapter) {
+		err = chapterRepo.SetChapterStatus(chapter.Id, models.DoneChapter)
+		if err != nil {
+			return err
+		}
 	}
 
 	pages := work.PageEnd - work.PageStart + 1

@@ -18,6 +18,7 @@ type ChapterRepository interface {
 	DeleteChapter(chapterId int) error
 	HasChapter(chapterId int) bool
 	GetChapter(chapterId int) (*models.Chapter, error)
+	SetChapterStatus(chapterId int, status models.ChapterStatus) error
 }
 
 type UserRepository interface {
@@ -36,6 +37,7 @@ type WorkRepository interface {
 	DeleteWork(workId int) error
 	HasWork(workId int) bool
 	MergeWorks([][]*models.Owner) error
+	IsChapterDone(chapter models.Chapter) bool
 }
 
 type TransactionRepository interface {
